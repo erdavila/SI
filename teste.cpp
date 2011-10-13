@@ -25,12 +25,12 @@ int main() {
 	LengthInCentimeters lengthCentimeter1 = lengthMeter1;
 	assert(lengthCentimeter1.value == 600);     // 6m = 600cm
 	assert(lengthCentimeter1 == lengthMeter1);
-	/*
 
 	lengthMeter1 *= 2;   // 6m * 2 = 12m
 	assert(lengthMeter1.value == 12);
 	assert(static_cast<LengthInCentimeters>(lengthMeter1).value == 1200);   // 12m = 1200cm
 
+	/*
 	lengthMeter1 += lengthCentimeter1;    // 12m + 600cm = 18m
 	assert(lengthMeter1.value == 18);
 

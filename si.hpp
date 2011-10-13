@@ -43,7 +43,6 @@ struct Value {
 	}
 
 	Value(ValueType value) : value(value) {}
-	/*
 
 
 	Value& operator*=(int n) {
@@ -53,6 +52,7 @@ struct Value {
 
 	Value& operator*=(double);
 
+	/*
 	Value& operator/=(int n) {
 		value /= n;
 		return *this;
