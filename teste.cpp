@@ -23,8 +23,8 @@ int main() {
 	// 6m = 600cm;
 	typedef SI_LENGTH_CENTIMETER(int) LengthInCentimeters;
 	LengthInCentimeters lengthCentimeter1 = lengthMeter1;
-	/*
 	assert(lengthCentimeter1.value == 600);     // 6m = 600cm
+	/*
 	assert(lengthCentimeter1 == lengthMeter1);
 
 	lengthMeter1 *= 2;   // 6m * 2 = 12m

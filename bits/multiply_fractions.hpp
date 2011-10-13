@@ -4,7 +4,7 @@
 
 
 template <typename Fraction1, typename Fraction2>
-struct _multiply_fractions {
+struct multiply_fractions {
 	struct value {
 		enum {
 			numerator   = Fraction1::numerator   * Fraction2::numerator,
