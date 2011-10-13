@@ -60,14 +60,14 @@ struct Value {
 
 	Value& operator/=(double);
 
+	*/
 
 	template <typename ValueType2, typename... Units2>
 	Value& operator+=(const Value<ValueType2, Units2...>& v) {
-		value += convert<ValueType2, Units2...>(v.value);
+		value += convertFrom<ValueType2, Units2...>(v.value);
 		return *this;
 	}
 
-	*/
 private:
 	template <typename ValueType2, typename... Units2>
 	static ValueType convertFrom(ValueType2 value) {
