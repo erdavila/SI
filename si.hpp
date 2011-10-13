@@ -93,7 +93,6 @@ operator==(const Value<ValueType, Units...>& v1,
 }
 
 
-/*
 
 template <typename ValueType1, typename... Units1,
           typename ValueType2, typename... Units2>
@@ -101,14 +100,16 @@ bool
 operator==(const Value<ValueType1, Units1...>& v1,
            const Value<ValueType2, Units2...>& v2)
 {
-	typedef typename _multipliers<Units1...>::value Ratio1;
-	typedef typename _multipliers<Units2...>::value Ratio2;
+	typedef typename get_dimensions<Units1...>::value dimensions1;
+	typedef typename get_dimensions<Units2...>::value dimensions2;
+	static_assert(same_types<dimensions1, dimensions2>::value, "Can't compare value of different units");
 
-	static_assert(_same_dimensions<_types_list<Units1...>, _types_list<Units2...>>::value, "Can't compare value of different units");
-	return v1.value * Ratio1::numerator / Ratio1::denominator
-	    == v2.value * Ratio2::numerator / Ratio2::denominator;
+	typedef typename multiply_ratios<Units1...>::value Ratio1;
+	typedef typename multiply_ratios<Units2...>::value Ratio2;
+
+	return v1.value * Ratio1::numerator * Ratio2::denominator
+	    == v2.value * Ratio2::numerator * Ratio1::denominator;
 }
-*/
 
 
 template <typename ValueType1, typename... Units1,
