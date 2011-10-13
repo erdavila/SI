@@ -52,7 +52,6 @@ struct Value {
 
 	Value& operator*=(double);
 
-	/*
 	Value& operator/=(int n) {
 		value /= n;
 		return *this;
@@ -60,7 +59,6 @@ struct Value {
 
 	Value& operator/=(double);
 
-	*/
 
 	template <typename ValueType2, typename... Units2>
 	Value& operator+=(const Value<ValueType2, Units2...>& v) {
