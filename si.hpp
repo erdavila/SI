@@ -83,17 +83,17 @@ private:
 
 
 
-/*
-template <typename ValueType, typename... Units>
+template <typename ValueType, typename Ratio, int... Units>
 bool
-operator==(const Value<ValueType, Units...>& v1,
-           const Value<ValueType, Units...>& v2)
+operator==(const Value<ValueType, Ratio, Units...>& v1,
+           const Value<ValueType, Ratio, Units...>& v2)
 {
 	return v1.value == v2.value;
 }
 
 
 
+/*
 template <typename ValueType1, typename... Units1,
           typename ValueType2, typename... Units2>
 bool
