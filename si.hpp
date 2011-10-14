@@ -1,31 +1,27 @@
 #ifndef SI_HPP_
 #define SI_HPP_
 
-/*
 
 namespace si {
 
 
+/*
 #include "bits/get_dimensions.hpp"
 #include "bits/multiply_ratios.hpp"
 #include "bits/same_types.hpp"
+*/
 
 
 
-template <int Dimensions, unsigned int RatioNumerator, unsigned int RatioDenominator>
-struct _Unit {
-	static const int dimensions = Dimensions;
-	struct ratio {
-		enum {
-			numerator = RatioNumerator,
-			denominator = RatioDenominator
-		};
-	};
+template <unsigned int Multiplier, unsigned int Divider>
+struct ratio {
+	static const unsigned int multiplier = Multiplier;
+	static const unsigned int divider    = Divider;
 };
 
 
 
-template <typename ValueType, typename... Units>
+template <typename ValueType, typename Ratio, int... Units>
 struct Value {
 	ValueType value;
 
@@ -34,6 +30,7 @@ struct Value {
 
 	Value(const Value& v) = default;
 
+	/*
 	template <typename ValueType2, typename... Units2>
 	Value(const Value<ValueType2, Units2...>& v)
 		: value(convertFrom<ValueType2, Units2...>(v.value))
@@ -42,10 +39,12 @@ struct Value {
 		typedef typename get_dimensions<Units2...>::value dimensions2;
 		static_assert(same_types<dimensions1, dimensions2>::value, "Can't construct from a different unit");
 	}
+	*/
 
-	Value(ValueType value) : value(value) {}
+	Value(const ValueType& value) : value(value) {}
 
 
+	/*
 	Value& operator*=(int n) {
 		value *= n;
 		return *this;
@@ -79,10 +78,12 @@ private:
 
 		return value * Ratio2::numerator * Ratio1::denominator / (Ratio2::denominator * Ratio1::numerator);
 	}
+	*/
 };
 
 
 
+/*
 template <typename ValueType, typename... Units>
 bool
 operator==(const Value<ValueType, Units...>& v1,
@@ -140,12 +141,13 @@ operator+(const Value<ValueType, Units...>& v1,
 }
 
 
+*/
 
-} / * namespace si * /
+} /* namespace si */
 
 
-
-#define SI_LENGTH_METER(VALUETYPE)      ::si::Value<VALUETYPE, ::si::_Unit<1,1,1>>
+#define SI_LENGTH_METER(VALUETYPE)      ::si::Value<VALUETYPE, ::si::ratio<1, 1>, 1>
+/*
 #define SI_LENGTH_CENTIMETER(VALUETYPE) ::si::Value<VALUETYPE, ::si::_Unit<1,1,100>>
 
 #define SI_AREA_METER(VALUETYPE) ::si::Value<VALUETYPE, ::si::_Unit<2,1,1>>

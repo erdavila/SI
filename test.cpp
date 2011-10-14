@@ -4,10 +4,9 @@
 #include <iostream>
 
 using namespace std;
-//using namespace si;
+
 
 int main() {
-	/*
 	typedef SI_LENGTH_METER(int) LengthInMeters;
 	LengthInMeters lengthMeter1;
 	LengthInMeters lengthMeter2(3);
@@ -15,6 +14,7 @@ int main() {
 
 	assert(lengthMeter2.value == 3);   // 3m
 	assert(lengthMeter3.value == 3);   // 3m
+	/*
 	assert(lengthMeter2 == lengthMeter3);
 
 	lengthMeter1 = lengthMeter2 + lengthMeter3;   // 3m + 3m = 6m
