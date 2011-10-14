@@ -26,14 +26,17 @@ struct Value {
 	Value(const ValueType& value) : value(value) {}
 
 
-	/*
 	Value& operator*=(int n) {
 		value *= n;
 		return *this;
 	}
 
-	Value& operator*=(double);
+	Value& operator*=(double n) {
+		value *= n;
+		return *this;
+	}
 
+	/*
 	Value& operator/=(int n) {
 		value /= n;
 		return *this;
