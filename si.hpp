@@ -5,19 +5,7 @@
 namespace si {
 
 
-/*
-#include "bits/get_dimensions.hpp"
-#include "bits/multiply_ratios.hpp"
-#include "bits/same_types.hpp"
-*/
-
-
-
-template <unsigned int Multiplier, unsigned int Divider>
-struct ratio {
-	static const unsigned int multiplier = Multiplier;
-	static const unsigned int divider    = Divider;
-};
+#include "bits/ratios.hpp"
 
 
 
@@ -65,7 +53,24 @@ struct Value {
 		value += convertFrom<ValueType2, Units2...>(v.value);
 		return *this;
 	}
+	*/
 
+
+	template <unsigned int Multiplier, unsigned int Divider>
+	struct with_ratio {
+		typedef ratio<Multiplier, Divider> _NewRatio;
+		typedef Value<ValueType, _NewRatio, Units...> type;
+	};
+
+	template <unsigned int Multiplier, unsigned int Divider>
+	struct apply_ratio {
+		typedef ratio<Multiplier, Divider> _Ratio2;
+		typedef typename ratios::multiply<Ratio, _Ratio2>::value _NewRatio;
+		typedef typename with_ratio<_NewRatio::multiplier, _NewRatio::divider>::type type;
+	};
+
+
+	/*
 private:
 	template <typename ValueType2, typename... Units2>
 	static ValueType convertFrom(ValueType2 value) {
@@ -149,10 +154,10 @@ operator+(const Value<ValueType, Ratio, Units...>& v1,
 } /* namespace si */
 
 
-#define SI_LENGTH_METER(VALUETYPE)      ::si::Value<VALUETYPE, ::si::ratio<1, 1>, 1>
-/*
-#define SI_LENGTH_CENTIMETER(VALUETYPE) ::si::Value<VALUETYPE, ::si::_Unit<1,1,100>>
+#define SI_LENGTH_METER(VALUETYPE)       ::si::Value<VALUETYPE, ::si::ratio<1, 1>, 1>
+#define SI_LENGTH_CENTIMETER(VALUETYPE)  SI_LENGTH_METER(VALUETYPE)::apply_ratio<1, 100>::type
 
+/*
 #define SI_AREA_METER(VALUETYPE) ::si::Value<VALUETYPE, ::si::_Unit<2,1,1>>
 */
 

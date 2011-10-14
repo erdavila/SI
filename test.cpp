@@ -20,9 +20,9 @@ int main() {
 	assert(lengthMeter1.value == 6);   // 6m
 	assert(lengthMeter1 != lengthMeter3);
 
-	/*
 	// 6m = 600cm;
 	typedef SI_LENGTH_CENTIMETER(int) LengthInCentimeters;
+	/*
 	LengthInCentimeters lengthCentimeter1 = lengthMeter1;
 	assert(lengthCentimeter1.value == 600);     // 6m = 600cm
 	assert(lengthCentimeter1 == lengthMeter1);
