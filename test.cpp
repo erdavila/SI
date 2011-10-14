@@ -18,9 +18,9 @@ int main() {
 
 	lengthMeter1 = lengthMeter2 + lengthMeter3;   // 3m + 3m = 6m
 	assert(lengthMeter1.value == 6);   // 6m
-	/*
 	assert(lengthMeter1 != lengthMeter3);
 
+	/*
 	// 6m = 600cm;
 	typedef SI_LENGTH_CENTIMETER(int) LengthInCentimeters;
 	LengthInCentimeters lengthCentimeter1 = lengthMeter1;

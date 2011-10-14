@@ -110,19 +110,22 @@ operator==(const Value<ValueType1, Units1...>& v1,
 	return v1.value * Ratio1::numerator * Ratio2::denominator
 	    == v2.value * Ratio2::numerator * Ratio1::denominator;
 }
+*/
 
 
-template <typename ValueType1, typename... Units1,
-          typename ValueType2, typename... Units2>
+template <typename ValueType1, typename Ratio1,
+          typename ValueType2, typename Ratio2,
+          int... Units>
 bool
-operator!=(const Value<ValueType1, Units1...>& v1,
-           const Value<ValueType2, Units2...>& v2)
+operator!=(const Value<ValueType1, Ratio1, Units...>& v1,
+           const Value<ValueType2, Ratio2, Units...>& v2)
 {
 	return !(v1 == v2);
 }
 
 
 
+/*
 template <typename ValueType1, typename... Units1,
           typename ValueType2, typename... Units2>
 typename _binary_operation<ValueType1, _types_list<Units1...>,
