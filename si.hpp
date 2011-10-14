@@ -36,14 +36,12 @@ struct Value {
 		return *this;
 	}
 
-	/*
 	Value& operator/=(int n) {
 		value /= n;
 		return *this;
 	}
 
 	Value& operator/=(double);
-	*/
 
 
 	Value& operator+=(const Value&);

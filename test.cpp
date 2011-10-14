@@ -33,10 +33,10 @@ int main() {
 	lengthMeter1 += lengthCentimeter1;    // 12m + 600cm = 18m
 	assert(lengthMeter1.value == 18);
 
-	/*
 	lengthCentimeter1 /= 24;    // 600cm / 24 = 25cm
 	assert(lengthCentimeter1.value == 25);
 
+	/*
 	typedef SI_LENGTH_METER(double) LengthInMetersDouble;
 	assert(lengthCentimeter1 + lengthMeter1 == LengthInCentimeters(1825));    //  25cm + 18m = 1825cm
 	assert(lengthCentimeter1 + lengthMeter1 == LengthInMetersDouble(18.25));    //  25cm + 18m = 18.25m
