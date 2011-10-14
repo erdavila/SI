@@ -43,14 +43,16 @@ struct Value {
 	}
 
 	Value& operator/=(double);
+	*/
 
 
-	template <typename ValueType2, typename... Units2>
-	Value& operator+=(const Value<ValueType2, Units2...>& v) {
-		value += convertFrom<ValueType2, Units2...>(v.value);
+	Value& operator+=(const Value&);
+
+	template <typename ValueType2, typename Scale2>
+	Value& operator+=(const Value<ValueType2, Scale2, Units...>& v) {
+		value += convertFrom<ValueType2, Scale2>(v.value);
 		return *this;
 	}
-	*/
 
 
 	template <unsigned int Multiplier, unsigned int Divider>
