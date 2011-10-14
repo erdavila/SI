@@ -9,16 +9,20 @@ namespace si {
 template <typename ValueType, typename Scale, int... Units>
 struct Value;
 
+template <typename ValueType, typename Scale, typename UnitsList>
+struct make_value;
+
 
 #include "bits/operations.hpp"
 #include "bits/scales.hpp"
+#include "bits/units_list.hpp"
 
 
 
-template <typename ValueType, typename _Scale, int... Units>
+template <typename ValueType, typename _Scale, int... _Units>
 struct Value {
 	typedef _Scale Scale;
-
+	typedef units_list<_Units...> Units;
 
 
 	ValueType value;
@@ -29,7 +33,7 @@ struct Value {
 	Value(const Value& v) = default;
 
 	template <typename ValueType2, typename Scale2>
-	Value(const Value<ValueType2, Scale2, Units...>& v)
+	Value(const Value<ValueType2, Scale2, _Units...>& v)
 		: value(convertFrom<ValueType2, Scale2>(v.value))
 	{}
 
@@ -57,7 +61,7 @@ struct Value {
 	Value& operator+=(const Value&);
 
 	template <typename ValueType2, typename Scale2>
-	Value& operator+=(const Value<ValueType2, Scale2, Units...>& v) {
+	Value& operator+=(const Value<ValueType2, Scale2, _Units...>& v) {
 		value += convertFrom<ValueType2, Scale2>(v.value);
 		return *this;
 	}
@@ -66,7 +70,7 @@ struct Value {
 	template <unsigned int Multiplier, unsigned int Divider>
 	struct with_scale {
 		typedef scale<Multiplier, Divider> _NewScale;
-		typedef Value<ValueType, _NewScale, Units...> type;
+		typedef Value<ValueType, _NewScale, _Units...> type;
 	};
 
 	template <unsigned int Multiplier, unsigned int Divider>
@@ -82,6 +86,12 @@ private:
 	static ValueType convertFrom(ValueType2 value) {
 		return value * Scale2::multiplier * Scale::divider / (Scale2::divider * Scale::multiplier);
 	}
+};
+
+
+template <typename ValueType, typename Scale, int... Units>
+struct make_value<ValueType, Scale, units_list<Units...>> {
+	typedef Value<ValueType, Scale, Units...> type;
 };
 
 

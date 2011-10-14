@@ -6,8 +6,59 @@
 using namespace std;
 
 
+//#define CANT_COMPILE
+
+
+typedef SI_LENGTH_METER(int) LengthInMeters;
+typedef SI_LENGTH_CENTIMETER(int) LengthInCentimeters;
+
+typedef SI_AREA_METER(int) AreaInMeters;
+
+
+
+/*
+ostream& operator<<(ostream& os, ::si::units_list<>) {
+	return os;
+}
+
+template <int... Units>
+ostream& operator<<(ostream& os, ::si::units_list<Units...> list) {
+	os << list.head << ',' << typename ::si::units_list<Units...>::tail();
+	return os;
+}
+*/
+
+
+
+namespace addition {
+
+
+void differentUnits() {
+	LengthInMeters len = 3;
+	AreaInMeters   area = 4;
+#ifdef CANT_COMPILE
+	len + area;
+#endif /* CANT_COMPILE */
+}
+
+
+void sameScaleSameUnits() {
+	LengthInMeters len1 = 3;
+	LengthInMeters len2 = 4;
+	LengthInMeters sum = len1 + len2;
+	assert(sum.value == 7);
+}
+
+}
+
+
+
+
 int main() {
-	typedef SI_LENGTH_METER(int) LengthInMeters;
+	addition::differentUnits();
+	addition::sameScaleSameUnits();
+
+
 	LengthInMeters lengthMeter1;
 	LengthInMeters lengthMeter2(3);
 	LengthInMeters lengthMeter3 = lengthMeter2;
@@ -41,7 +92,6 @@ int main() {
 	assert(lengthCentimeter1 + lengthMeter1 == LengthInMetersDouble(18.25));    //  25cm + 18m = 18.25m
 
 
-	typedef SI_AREA_METER(int) AreaInMeters;
 	lengthMeter1.value -= 6;    // 18m - 6m =  12m
 	AreaInMeters areaMeter = lengthCentimeter1 * lengthMeter1;    // 25cm * 12m = 3m²
 	assert(areaMeter.value = 3);
