@@ -5,12 +5,22 @@
 namespace si {
 
 
+
+template <typename ValueType, typename Scale, int... Units>
+struct Value;
+
+
+#include "bits/operations.hpp"
 #include "bits/scales.hpp"
 
 
 
-template <typename ValueType, typename Scale, int... Units>
+template <typename ValueType, typename _Scale, int... Units>
 struct Value {
+	typedef _Scale Scale;
+
+
+
 	ValueType value;
 
 
@@ -128,6 +138,24 @@ operator+(const Value<ValueType, Scale, Units...>& v1,
 {
 	return { v1.value + v2.value };
 }
+
+
+template <typename ValueType1, typename Scale1,
+          typename ValueType2, typename Scale2,
+          int... Units>
+typename addition<Value<ValueType1, Scale1, Units...>, Value<ValueType2, Scale2, Units...>>::type
+operator+(const Value<ValueType1, Scale1, Units...>& v1,
+          const Value<ValueType2, Scale2, Units...>& v2)
+{
+	typedef
+			typename addition<Value<ValueType1, Scale1, Units...>, Value<ValueType2, Scale2, Units...>>::type
+			ResultType;
+	return {
+		  v1.value * Scale1::multiplier * ResultType::Scale::divider / (Scale1::divider * ResultType::Scale::multiplier)
+		+ v2.value * Scale2::multiplier * ResultType::Scale::divider / (Scale2::divider * ResultType::Scale::multiplier)
+	};
+}
+
 
 
 

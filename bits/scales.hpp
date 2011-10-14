@@ -16,9 +16,6 @@ struct scale {
 
 
 
-namespace scales {
-
-
 
 template <unsigned int A, unsigned int B>
 struct gcd {
@@ -29,6 +26,18 @@ template <unsigned int A>
 struct gcd<A, 0> {
 	static const unsigned int value = A;
 };
+
+
+
+template <unsigned int A, unsigned int B>
+struct lcm {
+	static const unsigned int value = A * B / gcd<A, B>::value;
+};
+
+
+
+namespace scales {
+
 
 
 
