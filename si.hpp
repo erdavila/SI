@@ -18,16 +18,10 @@ struct Value {
 
 	Value(const Value& v) = default;
 
-	/*
-	template <typename ValueType2, typename... Units2>
-	Value(const Value<ValueType2, Units2...>& v)
-		: value(convertFrom<ValueType2, Units2...>(v.value))
-	{
-		typedef typename get_dimensions<Units... >::value dimensions1;
-		typedef typename get_dimensions<Units2...>::value dimensions2;
-		static_assert(same_types<dimensions1, dimensions2>::value, "Can't construct from a different unit");
-	}
-	*/
+	template <typename ValueType2, typename Scale2>
+	Value(const Value<ValueType2, Scale2, Units...>& v)
+		: value(convertFrom<ValueType2, Scale2>(v.value))
+	{}
 
 	Value(const ValueType& value) : value(value) {}
 
@@ -70,20 +64,11 @@ struct Value {
 	};
 
 
-	/*
 private:
-	template <typename ValueType2, typename... Units2>
+	template <typename ValueType2, typename Scale2>
 	static ValueType convertFrom(ValueType2 value) {
-		typedef typename get_dimensions<Units... >::value dimensions1;
-		typedef typename get_dimensions<Units2...>::value dimensions2;
-		static_assert(same_types<dimensions1, dimensions2>::value, "Can't convert from a different unit");
-
-		typedef typename multiply_ratios<Units ...>::value Ratio1;
-		typedef typename multiply_ratios<Units2...>::value Ratio2;
-
-		return value * Ratio2::numerator * Ratio1::denominator / (Ratio2::denominator * Ratio1::numerator);
+		return value * Scale2::multiplier * Scale::divider / (Scale2::divider * Scale::multiplier);
 	}
-	*/
 };
 
 
