@@ -15,10 +15,10 @@ int main() {
 	assert(lengthMeter2.value == 3);   // 3m
 	assert(lengthMeter3.value == 3);   // 3m
 	assert(lengthMeter2 == lengthMeter3);
-	/*
 
 	lengthMeter1 = lengthMeter2 + lengthMeter3;   // 3m + 3m = 6m
 	assert(lengthMeter1.value == 6);   // 6m
+	/*
 	assert(lengthMeter1 != lengthMeter3);
 
 	// 6m = 600cm;

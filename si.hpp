@@ -129,19 +129,19 @@ typename _binary_operation<ValueType1, _types_list<Units1...>,
                            ValueType2, _types_list<Units2...>>::product_type
 operator*(const Value<ValueType1, Units1...>& v1,
           const Value<ValueType2, Units2...>& v2);
+*/
 
 
 
-template <typename ValueType, typename... Units>
-Value<ValueType, Units...>
-operator+(const Value<ValueType, Units...>& v1,
-          const Value<ValueType, Units...>& v2)
+template <typename ValueType, typename Ratio, int... Units>
+Value<ValueType, Ratio, Units...>
+operator+(const Value<ValueType, Ratio, Units...>& v1,
+          const Value<ValueType, Ratio, Units...>& v2)
 {
 	return { v1.value + v2.value };
 }
 
 
-*/
 
 } /* namespace si */
 
