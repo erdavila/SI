@@ -5,11 +5,11 @@
 namespace si {
 
 
-#include "bits/ratios.hpp"
+#include "bits/scales.hpp"
 
 
 
-template <typename ValueType, typename Ratio, int... Units>
+template <typename ValueType, typename Scale, int... Units>
 struct Value {
 	ValueType value;
 
@@ -57,16 +57,16 @@ struct Value {
 
 
 	template <unsigned int Multiplier, unsigned int Divider>
-	struct with_ratio {
-		typedef ratio<Multiplier, Divider> _NewRatio;
-		typedef Value<ValueType, _NewRatio, Units...> type;
+	struct with_scale {
+		typedef scale<Multiplier, Divider> _NewScale;
+		typedef Value<ValueType, _NewScale, Units...> type;
 	};
 
 	template <unsigned int Multiplier, unsigned int Divider>
-	struct apply_ratio {
-		typedef ratio<Multiplier, Divider> _Ratio2;
-		typedef typename ratios::multiply<Ratio, _Ratio2>::value _NewRatio;
-		typedef typename with_ratio<_NewRatio::multiplier, _NewRatio::divider>::type type;
+	struct apply_scale {
+		typedef scale<Multiplier, Divider> _Scale2;
+		typedef typename scales::multiply<Scale, _Scale2>::value _NewScale;
+		typedef typename with_scale<_NewScale::multiplier, _NewScale::divider>::type type;
 	};
 
 
@@ -88,10 +88,10 @@ private:
 
 
 
-template <typename ValueType, typename Ratio, int... Units>
+template <typename ValueType, typename Scale, int... Units>
 bool
-operator==(const Value<ValueType, Ratio, Units...>& v1,
-           const Value<ValueType, Ratio, Units...>& v2)
+operator==(const Value<ValueType, Scale, Units...>& v1,
+           const Value<ValueType, Scale, Units...>& v2)
 {
 	return v1.value == v2.value;
 }
@@ -118,12 +118,12 @@ operator==(const Value<ValueType1, Units1...>& v1,
 */
 
 
-template <typename ValueType1, typename Ratio1,
-          typename ValueType2, typename Ratio2,
+template <typename ValueType1, typename Scale1,
+          typename ValueType2, typename Scale2,
           int... Units>
 bool
-operator!=(const Value<ValueType1, Ratio1, Units...>& v1,
-           const Value<ValueType2, Ratio2, Units...>& v2)
+operator!=(const Value<ValueType1, Scale1, Units...>& v1,
+           const Value<ValueType2, Scale2, Units...>& v2)
 {
 	return !(v1 == v2);
 }
@@ -141,10 +141,10 @@ operator*(const Value<ValueType1, Units1...>& v1,
 
 
 
-template <typename ValueType, typename Ratio, int... Units>
-Value<ValueType, Ratio, Units...>
-operator+(const Value<ValueType, Ratio, Units...>& v1,
-          const Value<ValueType, Ratio, Units...>& v2)
+template <typename ValueType, typename Scale, int... Units>
+Value<ValueType, Scale, Units...>
+operator+(const Value<ValueType, Scale, Units...>& v1,
+          const Value<ValueType, Scale, Units...>& v2)
 {
 	return { v1.value + v2.value };
 }
@@ -154,8 +154,8 @@ operator+(const Value<ValueType, Ratio, Units...>& v1,
 } /* namespace si */
 
 
-#define SI_LENGTH_METER(VALUETYPE)       ::si::Value<VALUETYPE, ::si::ratio<1, 1>, 1>
-#define SI_LENGTH_CENTIMETER(VALUETYPE)  SI_LENGTH_METER(VALUETYPE)::apply_ratio<1, 100>::type
+#define SI_LENGTH_METER(VALUETYPE)       ::si::Value<VALUETYPE, ::si::scale<1, 1>, 1>
+#define SI_LENGTH_CENTIMETER(VALUETYPE)  SI_LENGTH_METER(VALUETYPE)::apply_scale<1, 100>::type
 
 /*
 #define SI_AREA_METER(VALUETYPE) ::si::Value<VALUETYPE, ::si::_Unit<2,1,1>>
