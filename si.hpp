@@ -83,24 +83,16 @@ operator==(const Value<ValueType, Scale, Units...>& v1,
 
 
 
-/*
-template <typename ValueType1, typename... Units1,
-          typename ValueType2, typename... Units2>
+template <typename ValueType1, typename Scale1,
+          typename ValueType2, typename Scale2,
+          int... Units>
 bool
-operator==(const Value<ValueType1, Units1...>& v1,
-           const Value<ValueType2, Units2...>& v2)
+operator==(const Value<ValueType1, Scale1, Units...>& v1,
+           const Value<ValueType2, Scale2, Units...>& v2)
 {
-	typedef typename get_dimensions<Units1...>::value dimensions1;
-	typedef typename get_dimensions<Units2...>::value dimensions2;
-	static_assert(same_types<dimensions1, dimensions2>::value, "Can't compare value of different units");
-
-	typedef typename multiply_ratios<Units1...>::value Ratio1;
-	typedef typename multiply_ratios<Units2...>::value Ratio2;
-
-	return v1.value * Ratio1::numerator * Ratio2::denominator
-	    == v2.value * Ratio2::numerator * Ratio1::denominator;
+	return v1.value * Scale1::multiplier * Scale2::divider
+	    == v2.value * Scale2::multiplier * Scale1::divider;
 }
-*/
 
 
 template <typename ValueType1, typename Scale1,
