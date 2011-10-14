@@ -120,14 +120,15 @@ operator!=(const Value<ValueType1, Scale1, Units...>& v1,
 
 
 
-/*
-template <typename ValueType1, typename... Units1,
-          typename ValueType2, typename... Units2>
-typename _binary_operation<ValueType1, _types_list<Units1...>,
-                           ValueType2, _types_list<Units2...>>::product_type
-operator*(const Value<ValueType1, Units1...>& v1,
-          const Value<ValueType2, Units2...>& v2);
-*/
+template <typename ValueType1, typename Scale1,
+          typename ValueType2, typename Scale2,
+          int... Units>
+typename multiplication<Value<ValueType1, Scale1, Units...>, Value<ValueType2, Scale2, Units...>>::type
+operator*(const Value<ValueType1, Scale1, Units...>& v1,
+          const Value<ValueType2, Scale2, Units...>& v2)
+{
+	return { v1.value * v2.value };
+}
 
 
 
@@ -150,6 +151,7 @@ operator+(const Value<ValueType1, Scale1, Units...>& v1,
 	typedef
 			typename addition<Value<ValueType1, Scale1, Units...>, Value<ValueType2, Scale2, Units...>>::type
 			ResultType;
+
 	return {
 		  v1.value * Scale1::multiplier * ResultType::Scale::divider / (Scale1::divider * ResultType::Scale::multiplier)
 		+ v2.value * Scale2::multiplier * ResultType::Scale::divider / (Scale2::divider * ResultType::Scale::multiplier)
@@ -165,9 +167,8 @@ operator+(const Value<ValueType1, Scale1, Units...>& v1,
 #define SI_LENGTH_METER(VALUETYPE)       ::si::Value<VALUETYPE, ::si::scale<1, 1>, 1>
 #define SI_LENGTH_CENTIMETER(VALUETYPE)  SI_LENGTH_METER(VALUETYPE)::apply_scale<1, 100>::type
 
-/*
-#define SI_AREA_METER(VALUETYPE) ::si::Value<VALUETYPE, ::si::_Unit<2,1,1>>
-*/
+#define SI_AREA_METER(VALUETYPE)         ::si::multiplication<SI_LENGTH_METER(VALUETYPE), SI_LENGTH_METER(VALUETYPE)>::type
+#define SI_AREA_CENTIMETER(VALUETYPE)    ::si::multiplication<SI_LENGTH_CENTIMETER(VALUETYPE), SI_LENGTH_CENTIMETER(VALUETYPE)>::type
 
 
 #endif /* SI_HPP_ */
