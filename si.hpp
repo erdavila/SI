@@ -1,6 +1,7 @@
 #ifndef SI_HPP_
 #define SI_HPP_
 
+/*
 
 namespace si {
 
@@ -120,7 +121,6 @@ operator!=(const Value<ValueType1, Units1...>& v1,
 }
 
 
-/*
 
 template <typename ValueType1, typename... Units1,
           typename ValueType2, typename... Units2>
@@ -129,7 +129,6 @@ typename _binary_operation<ValueType1, _types_list<Units1...>,
 operator*(const Value<ValueType1, Units1...>& v1,
           const Value<ValueType2, Units2...>& v2);
 
-*/
 
 
 template <typename ValueType, typename... Units>
@@ -142,7 +141,7 @@ operator+(const Value<ValueType, Units...>& v1,
 
 
 
-} /* namespace si */
+} / * namespace si * /
 
 
 
@@ -150,6 +149,7 @@ operator+(const Value<ValueType, Units...>& v1,
 #define SI_LENGTH_CENTIMETER(VALUETYPE) ::si::Value<VALUETYPE, ::si::_Unit<1,1,100>>
 
 #define SI_AREA_METER(VALUETYPE) ::si::Value<VALUETYPE, ::si::_Unit<2,1,1>>
+*/
 
 
 #endif /* SI_HPP_ */
