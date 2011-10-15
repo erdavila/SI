@@ -6,7 +6,6 @@
 using namespace std;
 
 
-//#define CANT_COMPILE
 
 
 typedef SI_LENGTH_METER(int) LengthInMeters;
@@ -29,34 +28,22 @@ ostream& operator<<(ostream& os, ::si::units_list<Units...> list) {
 */
 
 
-
-namespace addition {
-
-
-void differentUnits() {
-	LengthInMeters len = 3;
-	AreaInMeters   area = 4;
-#ifdef CANT_COMPILE
-	len + area;
-#endif /* CANT_COMPILE */
-}
+//#define TRY_TO_COMPILE_EVERYTHING
 
 
-void sameScaleSameUnits() {
-	LengthInMeters len1 = 3;
-	LengthInMeters len2 = 4;
-	LengthInMeters sum = len1 + len2;
-	assert(sum.value == 7);
-}
+#ifdef TRY_TO_COMPILE_EVERYTHING
+ #define CANT_COMPILE(CODE) CODE; assert(!"Compilation should have failed!");
+#else
+ #define CANT_COMPILE(CODE)
+#endif
 
-}
 
+#include "tests/test_additions.hpp"
 
 
 
 int main() {
-	addition::differentUnits();
-	addition::sameScaleSameUnits();
+	additions::test();
 
 
 	LengthInMeters lengthMeter1;
