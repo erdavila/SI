@@ -32,20 +32,23 @@ public:
 
 
 
-
-template <typename SIValue1, typename SIValue2>
+template <typename T1, typename T2>
 struct multiplication {
+	typedef decltype(*static_cast<T1*>(0) * *static_cast<T2*>(0)) type;
+};
+
+
+template <typename ValueType1, typename Ratio1, int... BaseUnitPowers1,
+          typename ValueType2, typename Ratio2, int... BaseUnitPowers2>
+struct multiplication<Value<ValueType1, Ratio1, BaseUnitPowers1...>,
+            Value<ValueType2, Ratio2, BaseUnitPowers2...>>
+{
 private:
-	typedef typename SIValue1::ValueType _ValueType1;
-	typedef typename SIValue2::ValueType _ValueType2;
-	typedef decltype(*static_cast<_ValueType1*>(0) * *static_cast<_ValueType2*>(0)) _NewValueType;
+	typedef typename multiplication<ValueType1, ValueType2>::type _NewValueType;
+	typedef std::ratio_multiply<Ratio1, Ratio2> _NewRatio;
 
-	typedef typename SIValue1::Ratio _Ratio1;
-	typedef typename SIValue2::Ratio _Ratio2;
-	typedef std::ratio_multiply<_Ratio1, _Ratio2> _NewRatio;
-
-	typedef typename SIValue1::BaseUnitPowersList _BaseUnitPowersList1;
-	typedef typename SIValue2::BaseUnitPowersList _BaseUnitPowersList2;
+	typedef int_list<BaseUnitPowers1...> _BaseUnitPowersList1;
+	typedef int_list<BaseUnitPowers2...> _BaseUnitPowersList2;
 	typedef typename int_list_add<_BaseUnitPowersList1, _BaseUnitPowersList2>::list _NewBaseUnitPowersList;
 
 public:

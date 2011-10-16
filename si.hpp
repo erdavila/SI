@@ -123,10 +123,11 @@ struct make_value<ValueType, Ratio, int_list<BaseUnitPowers...>> {
 
 
 
-template <typename ValueType, typename Ratio, int... BaseUnitPowers>
+// This specialization compares values with same ratios, so no conversion is needed.
+template <typename ValueType1, typename ValueType2, typename Ratio, int... BaseUnitPowers>
 bool
-operator==(const Value<ValueType, Ratio, BaseUnitPowers...>& v1,
-           const Value<ValueType, Ratio, BaseUnitPowers...>& v2)
+operator==(const Value<ValueType1, Ratio, BaseUnitPowers...>& v1,
+           const Value<ValueType2, Ratio, BaseUnitPowers...>& v2)
 {
 	return v1.value == v2.value;
 }
@@ -156,10 +157,11 @@ operator!=(const Value<ValueType1, Ratio1, BaseUnitPowers...>& v1,
 }
 
 
-template <typename ValueType, typename Ratio, int... BaseUnitPowers>
+// This specialization compares values with same ratios, so no conversion is needed.
+template <typename ValueType1, typename ValueType2, typename Ratio, int... BaseUnitPowers>
 bool
-operator<(const Value<ValueType, Ratio, BaseUnitPowers...>& v1,
-          const Value<ValueType, Ratio, BaseUnitPowers...>& v2)
+operator<(const Value<ValueType1, Ratio, BaseUnitPowers...>& v1,
+          const Value<ValueType2, Ratio, BaseUnitPowers...>& v2)
 {
 	return v1.value < v2.value;
 }
@@ -215,18 +217,58 @@ operator>=(const Value<ValueType1, Ratio1, BaseUnitPowers...>& v1,
 
 
 
-template <typename ValueType1, typename Ratio1,
-          typename ValueType2, typename Ratio2,
-          int... BaseUnitPowers>
-typename multiplication<Value<ValueType1, Ratio1, BaseUnitPowers...>,
-                        Value<ValueType2, Ratio2, BaseUnitPowers...>>::type
-operator*(const Value<ValueType1, Ratio1, BaseUnitPowers...>& v1,
-          const Value<ValueType2, Ratio2, BaseUnitPowers...>& v2)
+template <typename ValueType, typename Ratio, int... BaseUnitPowers>
+Value<typename multiplication<ValueType, int>::type, Ratio, BaseUnitPowers...>
+operator*(const Value<ValueType, Ratio, BaseUnitPowers...>& v, int i) {
+	typedef
+		Value<typename multiplication<ValueType, int>::type, Ratio, BaseUnitPowers...>
+		ResultType;
+	return ResultType(v.value * i);
+}
+
+
+template <typename ValueType, typename Ratio, int... BaseUnitPowers>
+Value<typename multiplication<int, ValueType>::type, Ratio, BaseUnitPowers...>
+operator*(int i, const Value<ValueType, Ratio, BaseUnitPowers...>& v) {
+	typedef
+		Value<typename multiplication<int, ValueType>::type, Ratio, BaseUnitPowers...>
+		ResultType;
+	return ResultType(i * v.value);
+}
+
+
+template <typename ValueType, typename Ratio, int... BaseUnitPowers>
+Value<typename multiplication<ValueType, double>::type, Ratio, BaseUnitPowers...>
+operator*(const Value<ValueType, Ratio, BaseUnitPowers...>& v, double d) {
+	typedef
+		Value<typename multiplication<ValueType, double>::type, Ratio, BaseUnitPowers...>
+		ResultType;
+	return ResultType(v.value * d);
+}
+
+
+template <typename ValueType, typename Ratio, int... BaseUnitPowers>
+Value<typename multiplication<double, ValueType>::type, Ratio, BaseUnitPowers...>
+operator*(double d, const Value<ValueType, Ratio, BaseUnitPowers...>& v) {
+	typedef
+		Value<typename multiplication<double, ValueType>::type, Ratio, BaseUnitPowers...>
+		ResultType;
+	return ResultType(d * v.value);
+}
+
+
+
+template <typename ValueType1, typename Ratio1, int... BaseUnitPowers1,
+          typename ValueType2, typename Ratio2, int... BaseUnitPowers2>
+typename multiplication<Value<ValueType1, Ratio1, BaseUnitPowers1...>,
+                        Value<ValueType2, Ratio2, BaseUnitPowers2...>>::type
+operator*(const Value<ValueType1, Ratio1, BaseUnitPowers1...>& v1,
+          const Value<ValueType2, Ratio2, BaseUnitPowers2...>& v2)
 {
 	typedef
-			typename multiplication<Value<ValueType1, Ratio1, BaseUnitPowers...>,
-			                        Value<ValueType2, Ratio2, BaseUnitPowers...>>::type
-			ResultType;
+		typename multiplication<Value<ValueType1, Ratio1, BaseUnitPowers1...>,
+		                        Value<ValueType2, Ratio2, BaseUnitPowers2...>>::type
+		ResultType;
 
 	return ResultType(v1.value * v2.value);
 }
@@ -251,9 +293,9 @@ operator+(const Value<ValueType1, Ratio1, BaseUnitPowers...>& v1,
           const Value<ValueType2, Ratio2, BaseUnitPowers...>& v2)
 {
 	typedef
-			typename addition<Value<ValueType1, Ratio1, BaseUnitPowers...>,
-			                  Value<ValueType2, Ratio2, BaseUnitPowers...>>::type
-			ResultType;
+		typename addition<Value<ValueType1, Ratio1, BaseUnitPowers...>,
+		                  Value<ValueType2, Ratio2, BaseUnitPowers...>>::type
+		ResultType;
 
 	return ResultType(
 		  v1.value * Ratio1::num * ResultType::Ratio::den / (Ratio1::den * ResultType::Ratio::num)
@@ -274,7 +316,7 @@ operator+(const Value<ValueType1, Ratio1, BaseUnitPowers...>& v1,
 #define SI_TIME_ns(VALUETYPE)    SI_TIME_s(VALUETYPE)::with_ratio< ::std::nano>::type
 #define SI_TIME_us(VALUETYPE)    SI_TIME_s(VALUETYPE)::with_ratio< ::std::micro>::type
 #define SI_TIME_ms(VALUETYPE)    SI_TIME_s(VALUETYPE)::with_ratio< ::std::milli>::type
-#define SI_TIME_s(VALUETYPE)     ::si::Value<VALUETYPE, ::std::ratio<1>, 0, 0, 1>
+#define SI_TIME_s(VALUETYPE)     ::si::Value<VALUETYPE, ::std::ratio<1>, 0, 0, 1, 0>
 #define SI_TIME_min(VALUETYPE)   SI_TIME_s(VALUETYPE)::apply_ratio< ::std::ratio<60>>::type
 #define SI_TIME_h(VALUETYPE)     SI_TIME_min(VALUETYPE)::apply_ratio< ::std::ratio<60>>::type
 #define SI_TIME_d(VALUETYPE)     SI_TIME_h(VALUETYPE)::apply_ratio< ::std::ratio<24>>::type
@@ -286,6 +328,12 @@ operator+(const Value<ValueType1, Ratio1, BaseUnitPowers...>& v1,
 #define SI_SPEED_m_s(VALUETYPE)  ::si::division<SI_LENGTH_m(VALUETYPE), SI_TIME_s(VALUETYPE)>::type
 
 #define SI_ACCELERATION_m_s2(VALUETYPE)  ::si::division<SI_SPEED_m_s(VALUETYPE), SI_TIME_s(VALUETYPE)>::type
+
+#define SI_VOLUME_m3(VALUETYPE)  ::si::multiplication<SI_AREA_m2(VALUETYPE), SI_LENGTH_m(VALUETYPE)>::type
+
+#define SI_ELECTRICCURRENT_A(VALUETYPE) ::si::Value<VALUETYPE, ::std::ratio<1>, 0, 0, 0, 1>
+
+#define SI_ELECTRICCHARGE_C(VALUETYPE)  ::si::multiplication<SI_ELECTRICCURRENT_A(VALUETYPE), SI_TIME_s(VALUETYPE)>::type
 
 
 #endif /* SI_HPP_ */

@@ -6,14 +6,13 @@
 using namespace std;
 
 
-
-
 typedef SI_LENGTH_km(int)    Length_km;
 typedef SI_LENGTH_km(double) LengthDbl_km;
 typedef SI_LENGTH_m(int)     Length_m;
 typedef SI_LENGTH_m(double)  LengthDbl_m;
 typedef SI_LENGTH_cm(int)    Length_cm;
 
+typedef SI_TIME_s(int) Time_s;
 typedef SI_TIME_h(int) Time_h;
 
 typedef SI_AREA_km2(int)       Area_km2;
@@ -22,6 +21,11 @@ typedef SI_AREA_m2(int)        Area_m2;
 typedef SI_AREA_m2(double)     AreaDbl_m2;
 typedef SI_AREA_cm2(long long) Area_cm2;
 
+typedef SI_VOLUME_m3(int)  Volume_m3;
+
+typedef SI_ELECTRICCURRENT_A(int) ElectricCurrent_A;
+
+typedef SI_ELECTRICCHARGE_C(int) ElectricCharge_C;
 
 
 /*
@@ -49,6 +53,7 @@ ostream& operator<<(ostream& os, ::si::units_list<Units...> list) {
 
 #include "tests/constructors.hpp"
 #include "tests/additions.hpp"
+#include "tests/multiplications.hpp"
 #include "tests/comparisons.hpp"
 
 
@@ -56,6 +61,7 @@ ostream& operator<<(ostream& os, ::si::units_list<Units...> list) {
 int main() {
 	constructors::test();
 	additions::test();
+	multiplications::test();
 	comparisons::test();
 
 
