@@ -49,12 +49,14 @@ ostream& operator<<(ostream& os, ::si::units_list<Units...> list) {
 
 #include "tests/constructors.hpp"
 #include "tests/additions.hpp"
+#include "tests/comparisons.hpp"
 
 
 
 int main() {
 	constructors::test();
 	additions::test();
+	comparisons::test();
 
 
 	Length_m length_m_1;

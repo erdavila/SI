@@ -132,7 +132,6 @@ operator==(const Value<ValueType, Ratio, BaseUnitPowers...>& v1,
 }
 
 
-
 template <typename ValueType1, typename Ratio1,
           typename ValueType2, typename Ratio2,
           int... BaseUnitPowers>
@@ -140,8 +139,9 @@ bool
 operator==(const Value<ValueType1, Ratio1, BaseUnitPowers...>& v1,
            const Value<ValueType2, Ratio2, BaseUnitPowers...>& v2)
 {
-	return v1.value * Ratio1::num * Ratio2::den
-	    == v2.value * Ratio2::num * Ratio1::den;
+	const auto n1 = v1.value * Ratio1::num * Ratio2::den;
+	const auto n2 = v2.value * Ratio2::num * Ratio1::den;
+	return n1 == n2;
 }
 
 
@@ -153,6 +153,64 @@ operator!=(const Value<ValueType1, Ratio1, BaseUnitPowers...>& v1,
            const Value<ValueType2, Ratio2, BaseUnitPowers...>& v2)
 {
 	return !(v1 == v2);
+}
+
+
+template <typename ValueType, typename Ratio, int... BaseUnitPowers>
+bool
+operator<(const Value<ValueType, Ratio, BaseUnitPowers...>& v1,
+          const Value<ValueType, Ratio, BaseUnitPowers...>& v2)
+{
+	return v1.value < v2.value;
+}
+
+
+template <typename ValueType1, typename Ratio1,
+          typename ValueType2, typename Ratio2,
+          int... BaseUnitPowers>
+bool
+operator<(const Value<ValueType1, Ratio1, BaseUnitPowers...>& v1,
+          const Value<ValueType2, Ratio2, BaseUnitPowers...>& v2)
+{
+	const auto n1 = v1.value * Ratio1::num * Ratio2::den;
+	const auto n2 = v2.value * Ratio2::num * Ratio1::den;
+	return n1 < n2;
+}
+
+
+
+
+template <typename ValueType1, typename Ratio1,
+          typename ValueType2, typename Ratio2,
+          int... BaseUnitPowers>
+bool
+operator>(const Value<ValueType1, Ratio1, BaseUnitPowers...>& v1,
+          const Value<ValueType2, Ratio2, BaseUnitPowers...>& v2)
+{
+	return v2 < v1;
+}
+
+
+
+template <typename ValueType1, typename Ratio1,
+          typename ValueType2, typename Ratio2,
+          int... BaseUnitPowers>
+bool
+operator<=(const Value<ValueType1, Ratio1, BaseUnitPowers...>& v1,
+           const Value<ValueType2, Ratio2, BaseUnitPowers...>& v2)
+{
+	return !(v1 > v2);
+}
+
+
+template <typename ValueType1, typename Ratio1,
+          typename ValueType2, typename Ratio2,
+          int... BaseUnitPowers>
+bool
+operator>=(const Value<ValueType1, Ratio1, BaseUnitPowers...>& v1,
+           const Value<ValueType2, Ratio2, BaseUnitPowers...>& v2)
+{
+	return !(v1 < v2);
 }
 
 
@@ -202,7 +260,6 @@ operator+(const Value<ValueType1, Ratio1, BaseUnitPowers...>& v1,
 		+ v2.value * Ratio2::num * ResultType::Ratio::den / (Ratio2::den * ResultType::Ratio::num)
 	);
 }
-
 
 
 
