@@ -3,13 +3,14 @@
 
 
 #include <ratio>
+#include <type_traits>
 
 
 namespace si {
 
 
 
-template <typename ValueType, typename Ratio, int... Units>
+template <typename ValueType, typename Ratio, int... BaseUnitPowers>
 class Value;
 
 template <typename ValueType, typename Ratio, typename UnitsList>
@@ -17,16 +18,30 @@ struct make_value;
 
 
 #include "bits/operations.hpp"
-#include "bits/units_list.hpp"
+#include "bits/int_list.hpp"
 
 
 
-template <typename _ValueType, typename _Ratio, int... _Units>
+template <typename _ValueType, typename _Ratio, int... _BaseUnitPowers>
 class Value {
 public:
 	typedef _ValueType ValueType;
 	typedef _Ratio Ratio;
-	typedef units_list<_Units...> UnitsList;
+	typedef int_list<_BaseUnitPowers...> BaseUnitPowersList;
+
+
+	template <typename NewRatio>
+	struct with_ratio {
+		typedef Value<ValueType, NewRatio, _BaseUnitPowers...> type;
+	};
+
+	template <typename Ratio2>
+	struct apply_ratio {
+	private:
+		typedef std::ratio_multiply<Ratio, Ratio2> _NewRatio;
+	public:
+		typedef typename with_ratio<_NewRatio>::type type;
+	};
 
 
 	ValueType value;
@@ -40,7 +55,7 @@ public:
 
 	// Copy constructor from different ratio or underlying type
 	template <typename ValueTypeFrom, typename RatioFrom>
-	Value(const Value<ValueTypeFrom, RatioFrom, _Units...>& v)
+	Value(const Value<ValueTypeFrom, RatioFrom, _BaseUnitPowers...>& v)
 		: value(convertFrom<ValueTypeFrom, RatioFrom>(v.value))
 	{}
 
@@ -73,25 +88,10 @@ public:
 	}
 
 	template <typename ValueType2, typename Ratio2>
-	Value& operator+=(const Value<ValueType2, Ratio2, _Units...>& v) {
+	Value& operator+=(const Value<ValueType2, Ratio2, _BaseUnitPowers...>& v) {
 		value += convertFrom<ValueType2, Ratio2>(v.value);
 		return *this;
 	}
-
-
-	template <typename NewRatio>
-	struct with_ratio {
-		typedef Value<ValueType, NewRatio, _Units...> type;
-	};
-
-	template <typename Ratio2>
-	struct apply_ratio {
-	private:
-		typedef std::ratio_multiply<Ratio, Ratio2> _NewRatio;
-	public:
-		typedef typename with_ratio<_NewRatio>::type type;
-	};
-
 
 private:
 	template <typename ValueTypeFrom, typename RatioFrom>
@@ -116,17 +116,17 @@ private:
 
 
 // Defines an SI Value type from a unit_list type.
-template <typename ValueType, typename Ratio, int... Units>
-struct make_value<ValueType, Ratio, units_list<Units...>> {
-	typedef Value<ValueType, Ratio, Units...> type;
+template <typename ValueType, typename Ratio, int... BaseUnitPowers>
+struct make_value<ValueType, Ratio, int_list<BaseUnitPowers...>> {
+	typedef Value<ValueType, Ratio, BaseUnitPowers...> type;
 };
 
 
 
-template <typename ValueType, typename Ratio, int... Units>
+template <typename ValueType, typename Ratio, int... BaseUnitPowers>
 bool
-operator==(const Value<ValueType, Ratio, Units...>& v1,
-           const Value<ValueType, Ratio, Units...>& v2)
+operator==(const Value<ValueType, Ratio, BaseUnitPowers...>& v1,
+           const Value<ValueType, Ratio, BaseUnitPowers...>& v2)
 {
 	return v1.value == v2.value;
 }
@@ -135,10 +135,10 @@ operator==(const Value<ValueType, Ratio, Units...>& v1,
 
 template <typename ValueType1, typename Ratio1,
           typename ValueType2, typename Ratio2,
-          int... Units>
+          int... BaseUnitPowers>
 bool
-operator==(const Value<ValueType1, Ratio1, Units...>& v1,
-           const Value<ValueType2, Ratio2, Units...>& v2)
+operator==(const Value<ValueType1, Ratio1, BaseUnitPowers...>& v1,
+           const Value<ValueType2, Ratio2, BaseUnitPowers...>& v2)
 {
 	return v1.value * Ratio1::num * Ratio2::den
 	    == v2.value * Ratio2::num * Ratio1::den;
@@ -147,10 +147,10 @@ operator==(const Value<ValueType1, Ratio1, Units...>& v1,
 
 template <typename ValueType1, typename Ratio1,
           typename ValueType2, typename Ratio2,
-          int... Units>
+          int... BaseUnitPowers>
 bool
-operator!=(const Value<ValueType1, Ratio1, Units...>& v1,
-           const Value<ValueType2, Ratio2, Units...>& v2)
+operator!=(const Value<ValueType1, Ratio1, BaseUnitPowers...>& v1,
+           const Value<ValueType2, Ratio2, BaseUnitPowers...>& v2)
 {
 	return !(v1 == v2);
 }
@@ -159,13 +159,15 @@ operator!=(const Value<ValueType1, Ratio1, Units...>& v1,
 
 template <typename ValueType1, typename Ratio1,
           typename ValueType2, typename Ratio2,
-          int... Units>
-typename multiplication<Value<ValueType1, Ratio1, Units...>, Value<ValueType2, Ratio2, Units...>>::type
-operator*(const Value<ValueType1, Ratio1, Units...>& v1,
-          const Value<ValueType2, Ratio2, Units...>& v2)
+          int... BaseUnitPowers>
+typename multiplication<Value<ValueType1, Ratio1, BaseUnitPowers...>,
+                        Value<ValueType2, Ratio2, BaseUnitPowers...>>::type
+operator*(const Value<ValueType1, Ratio1, BaseUnitPowers...>& v1,
+          const Value<ValueType2, Ratio2, BaseUnitPowers...>& v2)
 {
 	typedef
-			typename multiplication<Value<ValueType1, Ratio1, Units...>, Value<ValueType2, Ratio2, Units...>>::type
+			typename multiplication<Value<ValueType1, Ratio1, BaseUnitPowers...>,
+			                        Value<ValueType2, Ratio2, BaseUnitPowers...>>::type
 			ResultType;
 
 	return ResultType(v1.value * v2.value);
@@ -173,24 +175,26 @@ operator*(const Value<ValueType1, Ratio1, Units...>& v1,
 
 
 
-template <typename ValueType, typename Ratio, int... Units>
-Value<ValueType, Ratio, Units...>
-operator+(const Value<ValueType, Ratio, Units...>& v1,
-          const Value<ValueType, Ratio, Units...>& v2)
+template <typename ValueType, typename Ratio, int... BaseUnitPowers>
+Value<ValueType, Ratio, BaseUnitPowers...>
+operator+(const Value<ValueType, Ratio, BaseUnitPowers...>& v1,
+          const Value<ValueType, Ratio, BaseUnitPowers...>& v2)
 {
-	return Value<ValueType, Ratio, Units...>(v1.value + v2.value);
+	return Value<ValueType, Ratio, BaseUnitPowers...>(v1.value + v2.value);
 }
 
 
 template <typename ValueType1, typename Ratio1,
           typename ValueType2, typename Ratio2,
-          int... Units>
-typename addition<Value<ValueType1, Ratio1, Units...>, Value<ValueType2, Ratio2, Units...>>::type
-operator+(const Value<ValueType1, Ratio1, Units...>& v1,
-          const Value<ValueType2, Ratio2, Units...>& v2)
+          int... BaseUnitPowers>
+typename addition<Value<ValueType1, Ratio1, BaseUnitPowers...>,
+                  Value<ValueType2, Ratio2, BaseUnitPowers...>>::type
+operator+(const Value<ValueType1, Ratio1, BaseUnitPowers...>& v1,
+          const Value<ValueType2, Ratio2, BaseUnitPowers...>& v2)
 {
 	typedef
-			typename addition<Value<ValueType1, Ratio1, Units...>, Value<ValueType2, Ratio2, Units...>>::type
+			typename addition<Value<ValueType1, Ratio1, BaseUnitPowers...>,
+			                  Value<ValueType2, Ratio2, BaseUnitPowers...>>::type
 			ResultType;
 
 	return ResultType(

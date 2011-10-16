@@ -3,71 +3,53 @@
 
 
 
-#include "units_list.hpp"
+#include "int_list.hpp"
 
 
 
-
-template <class T1, class T2>
-struct sum_units;
-
-template <int First1, int... Units1, int First2, int... Units2>
-struct sum_units<units_list<First1, Units1...>, units_list<First2, Units2...>> {
+template <typename SIValue1, typename SIValue2>
+struct addition {
 private:
-	static const int _NewFirst = First1 + First2;
-	typedef typename sum_units<units_list<Units1...>, units_list<Units2...>>::list _NewRestList;
-public:
-	typedef typename _NewRestList::template with_head<_NewFirst>::type list;
-};
+	static_assert(std::is_same<typename SIValue1::BaseUnitPowersList,
+	                           typename SIValue2::BaseUnitPowersList>::value,
+	              "The powers of base units must be the same on the addition");
 
-template <>
-struct sum_units<units_list<>, units_list<>> {
-	typedef units_list<> list;
-};
+	typedef typename SIValue1::ValueType _ValueType1;
+	typedef typename SIValue2::ValueType _ValueType2;
+	typedef decltype(*static_cast<_ValueType1*>(0) + *static_cast<_ValueType2*>(0)) _NewValueType;
 
-
-
-
-template <typename Value1, typename Value2>
-struct addition;
-
-
-template <typename ValueType1, typename Ratio1,
-          typename ValueType2, typename Ratio2,
-          int... Units>
-struct addition<Value<ValueType1, Ratio1, Units...>, Value<ValueType2, Ratio2, Units...>> {
-private:
-	typedef decltype(*static_cast<ValueType1*>(0) + *static_cast<ValueType2*>(0)) _NewValueType;
-
+	typedef typename SIValue1::Ratio _Ratio1;
+	typedef typename SIValue2::Ratio _Ratio2;
 	static const unsigned int _new_num = 1;
-	static const unsigned int _new_den = std::ratio_add<Ratio1, Ratio2>::den;
-
+	static const unsigned int _new_den = std::ratio_add<_Ratio1, _Ratio2>::den;
 	typedef std::ratio<_new_num, _new_den> _NewRatio;
 
+	typedef typename SIValue1::BaseUnitPowersList _NewBaseUnitPowersList;
+
 public:
-	typedef Value<_NewValueType, _NewRatio, Units...> type;
+	typedef typename make_value<_NewValueType, _NewRatio, _NewBaseUnitPowersList>::type type;
 };
 
 
 
 
-template <typename Value1, typename Value2>
-struct multiplication;
-
-
-template <typename ValueType1, typename Ratio1,
-          typename ValueType2, typename Ratio2,
-          int... Units>
-struct multiplication<Value<ValueType1, Ratio1, Units...>, Value<ValueType2, Ratio2, Units...>> {
+template <typename SIValue1, typename SIValue2>
+struct multiplication {
 private:
-	typedef decltype(*static_cast<ValueType1*>(0) * *static_cast<ValueType2*>(0)) _NewValueType;
+	typedef typename SIValue1::ValueType _ValueType1;
+	typedef typename SIValue2::ValueType _ValueType2;
+	typedef decltype(*static_cast<_ValueType1*>(0) * *static_cast<_ValueType2*>(0)) _NewValueType;
 
-	typedef std::ratio_multiply<Ratio1, Ratio2> _NewRatio;
+	typedef typename SIValue1::Ratio _Ratio1;
+	typedef typename SIValue2::Ratio _Ratio2;
+	typedef std::ratio_multiply<_Ratio1, _Ratio2> _NewRatio;
 
-	typedef typename sum_units<units_list<Units...>, units_list<Units...>>::list _NewUnitsList;
+	typedef typename SIValue1::BaseUnitPowersList _BaseUnitPowersList1;
+	typedef typename SIValue2::BaseUnitPowersList _BaseUnitPowersList2;
+	typedef typename int_list_add<_BaseUnitPowersList1, _BaseUnitPowersList2>::list _NewBaseUnitPowersList;
 
 public:
-	typedef typename make_value<_NewValueType, _NewRatio, _NewUnitsList>::type type;
+	typedef typename make_value<_NewValueType, _NewRatio, _NewBaseUnitPowersList>::type type;
 };
 
 
