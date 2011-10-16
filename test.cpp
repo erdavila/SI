@@ -47,11 +47,13 @@ ostream& operator<<(ostream& os, ::si::units_list<Units...> list) {
 #endif
 
 
+#include "tests/constructors.hpp"
 #include "tests/additions.hpp"
 
 
 
 int main() {
+	constructors::test();
 	additions::test();
 
 

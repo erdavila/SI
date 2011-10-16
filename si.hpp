@@ -28,15 +28,19 @@ struct Value {
 	ValueType value;
 
 
-	Value() = default;
+	// Default constructor
+	Value() : value() {}
 
+	// Copy constructor
 	Value(const Value& v) = default;
 
+	// Copy constructor for different scale or underlying type
 	template <typename ValueTypeFrom, typename ScaleFrom>
 	Value(const Value<ValueTypeFrom, ScaleFrom, _Units...>& v)
 		: value(convertFrom<ValueTypeFrom, ScaleFrom>(v.value))
 	{}
 
+	// Constructor from value
 	explicit
 	Value(const ValueType& value) : value(value) {}
 
