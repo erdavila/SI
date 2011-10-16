@@ -44,7 +44,7 @@ void differentUnits() {
 }
 
 
-void sameScaleSameUnits() {
+void sameRatioSameUnits() {
 	{
 		Length_m len1(3);
 		Length_m len2(4);
@@ -67,7 +67,7 @@ void sameScaleSameUnits() {
 }
 
 
-void differentScaleSameUnits1() {
+void differentRatioSameUnits1() {
 	{
 		const Length_m  len_m(4);
 		const Length_cm len_cm(2);
@@ -121,7 +121,7 @@ void differentScaleSameUnits1() {
 }
 
 
-void differentScaleSameUnits2() {
+void differentRatioSameUnits2() {
 	{
 		const Area_m2  area_m2(2);
 		const Area_cm2 area_cm2(4);
@@ -177,9 +177,9 @@ void differentScaleSameUnits2() {
 
 void test() {
 	differentUnits();
-	sameScaleSameUnits();
-	differentScaleSameUnits1();
-	differentScaleSameUnits2();
+	sameRatioSameUnits();
+	differentRatioSameUnits1();
+	differentRatioSameUnits2();
 }
 
 
