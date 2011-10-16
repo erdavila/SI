@@ -7,31 +7,40 @@
  */
 
 
+typedef unsigned long long ullong;
+
+
+
+template <ullong A, ullong B>
+struct gcd {
+	static const ullong value = gcd<B, A % B>::value;
+};
+
+template <ullong A>
+struct gcd<A, 0> {
+	static const ullong value = A;
+};
+
+
+
+template <ullong A, ullong B>
+struct lcm {
+	static const ullong value = A * B / gcd<A, B>::value;
+};
+
+
+
+
+
+
+
 
 template <unsigned int Multiplier, unsigned int Divider>
 struct scale {
-	static const unsigned int multiplier = Multiplier;
-	static const unsigned int divider    = Divider;
-};
+	static const ullong gcd = gcd<Multiplier, Divider>::value;
 
-
-
-
-template <unsigned int A, unsigned int B>
-struct gcd {
-	static const unsigned int value = gcd<B, A % B>::value;
-};
-
-template <unsigned int A>
-struct gcd<A, 0> {
-	static const unsigned int value = A;
-};
-
-
-
-template <unsigned int A, unsigned int B>
-struct lcm {
-	static const unsigned int value = A * B / gcd<A, B>::value;
+	static const ullong multiplier = Multiplier / gcd;
+	static const ullong divider    = Divider    / gcd;
 };
 
 
@@ -39,40 +48,30 @@ struct lcm {
 namespace scales {
 
 
-
-
-template <typename Scale>
-struct simplify {
-	static const unsigned int gcd = gcd<Scale::multiplier, Scale::divider>::value;
-	struct value {
-		static const unsigned int multiplier = Scale::multiplier / gcd;
-		static const unsigned int divider    = Scale::divider    / gcd;
-	};
-};
-
-
-
-
+// Pre-declaration
 template <typename... Scales>
 struct multiply;
 
+// Template specialization for a list of scales with at least one item.
 template <typename FirstScale, typename... Scales>
 struct multiply<FirstScale, Scales...> {
-	typedef typename multiply<Scales...>::value _Aux;
+	typedef typename multiply<Scales...>::value _Rest;
 
-	typedef scale<FirstScale::multiplier * _Aux::multiplier,
-	              FirstScale::divider    * _Aux::divider
-	             >
-	        _Aux2;
+	// Force "cross-simplification"
+	typedef scale<FirstScale::multiplier,      _Rest::divider> _Aux1;
+	typedef scale<     _Rest::multiplier, FirstScale::divider> _Aux2;
 
-	typedef typename simplify<_Aux2>::value value;
+	typedef scale<_Aux1::multiplier * _Aux2::multiplier,
+	              _Aux1::divider    * _Aux2::divider>
+	        value;
 };
 
+// Template specialization for an empty list of scales.
 template <>
 struct multiply<> {
 	struct value {
-		static const int multiplier = 1;
-		static const int divider    = 1;
+		static const ullong multiplier = 1;
+		static const ullong divider    = 1;
 	};
 };
 
