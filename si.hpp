@@ -38,7 +38,7 @@ public:
 	template <typename Ratio2>
 	struct apply_ratio {
 	private:
-		typedef std::ratio_multiply<Ratio, Ratio2> _NewRatio;
+		typedef typename std::ratio_multiply<Ratio, Ratio2>::type _NewRatio;
 	public:
 		typedef typename with_ratio<_NewRatio>::type type;
 	};
@@ -106,7 +106,7 @@ private:
 		typedef std::ratio<Ratio::den, RatioFrom::den> factor1;
 		typedef std::ratio<RatioFrom::num, Ratio::num> factor2;
 
-		typedef std::ratio_multiply<factor1, factor2> mult;
+		typedef typename std::ratio_multiply<factor1, factor2>::type mult;
 
 		const double num = mult::num;
 		const double den = mult::den;

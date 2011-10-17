@@ -21,7 +21,7 @@ private:
 	typedef typename SIValue1::Ratio _Ratio1;
 	typedef typename SIValue2::Ratio _Ratio2;
 	static const unsigned int _new_num = 1;
-	static const unsigned int _new_den = std::ratio_add<_Ratio1, _Ratio2>::den;
+	static const unsigned int _new_den = std::ratio_add<_Ratio1, _Ratio2>::type::den;
 	typedef std::ratio<_new_num, _new_den> _NewRatio;
 
 	typedef typename SIValue1::BaseUnitPowersList _NewBaseUnitPowersList;
@@ -45,7 +45,7 @@ struct multiplication<Value<ValueType1, Ratio1, BaseUnitPowers1...>,
 {
 private:
 	typedef typename multiplication<ValueType1, ValueType2>::type _NewValueType;
-	typedef std::ratio_multiply<Ratio1, Ratio2> _NewRatio;
+	typedef typename std::ratio_multiply<Ratio1, Ratio2>::type _NewRatio;
 
 	typedef int_list<BaseUnitPowers1...> _BaseUnitPowersList1;
 	typedef int_list<BaseUnitPowers2...> _BaseUnitPowersList2;
