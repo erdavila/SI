@@ -56,7 +56,32 @@ private:
 
 	typedef int_list<BaseUnitPowers1...> _BaseUnitPowersList1;
 	typedef int_list<BaseUnitPowers2...> _BaseUnitPowersList2;
-	typedef typename int_list_add<_BaseUnitPowersList1, _BaseUnitPowersList2>::list _NewBaseUnitPowersList;
+	typedef typename int_list_add<_BaseUnitPowersList1, _BaseUnitPowersList2>::type _NewBaseUnitPowersList;
+
+public:
+	typedef typename make_value<_NewValueType, _NewRatio, _NewBaseUnitPowersList>::type type;
+};
+
+
+
+template <typename T1, typename T2>
+struct division {
+	typedef decltype(*static_cast<T1*>(0) / *static_cast<T2*>(0)) type;
+};
+
+
+template <typename ValueType1, typename Ratio1, int... BaseUnitPowers1,
+          typename ValueType2, typename Ratio2, int... BaseUnitPowers2>
+struct division<SIValue<ValueType1, Ratio1, BaseUnitPowers1...>,
+                SIValue<ValueType2, Ratio2, BaseUnitPowers2...>>
+{
+private:
+	typedef typename division<ValueType1, ValueType2>::type _NewValueType;
+	typedef typename std::ratio_divide<Ratio1, Ratio2>::type _NewRatio;
+
+	typedef int_list<BaseUnitPowers1...> _BaseUnitPowersList1;
+	typedef int_list<BaseUnitPowers2...> _BaseUnitPowersList2;
+	typedef typename int_list_subtract<_BaseUnitPowersList1, _BaseUnitPowersList2>::type _NewBaseUnitPowersList;
 
 public:
 	typedef typename make_value<_NewValueType, _NewRatio, _NewBaseUnitPowersList>::type type;

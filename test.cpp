@@ -12,8 +12,9 @@ typedef SI_LENGTH_m(int)     Length_m;
 typedef SI_LENGTH_m(double)  LengthDbl_m;
 typedef SI_LENGTH_cm(int)    Length_cm;
 
-typedef SI_TIME_s(int) Time_s;
-typedef SI_TIME_h(int) Time_h;
+typedef SI_TIME_s(int)     Time_s;
+typedef SI_TIME_s(double)  TimeDbl_s;
+typedef SI_TIME_h(int)     Time_h;
 
 typedef SI_AREA_km2(int)       Area_km2;
 typedef SI_AREA_km2(double)    AreaDbl_km2;
@@ -23,9 +24,17 @@ typedef SI_AREA_cm2(long long) Area_cm2;
 
 typedef SI_VOLUME_m3(int)  Volume_m3;
 
+typedef SI_SPEED_m_s(int)     Speed_m_s;
+typedef SI_SPEED_m_s(double)  SpeedDbl_m_s;
+
+typedef SI_ACCELERATION_m_s2(int)  Acceleration_m_s2;
+
 typedef SI_ELECTRICCURRENT_A(int) ElectricCurrent_A;
 
 typedef SI_ELECTRICCHARGE_C(int) ElectricCharge_C;
+
+typedef SI_FREQUENCY_Hz(int)     Frequency_Hz;
+typedef SI_FREQUENCY_Hz(double)  FrequencyDbl_Hz;
 
 
 /*
@@ -52,19 +61,21 @@ ostream& operator<<(ostream& os, ::si::units_list<Units...> list) {
 
 
 #include "tests/constructors.hpp"
+#include "tests/comparisons.hpp"
 #include "tests/additions.hpp"
 #include "tests/subtractions.hpp"
 #include "tests/multiplications.hpp"
-#include "tests/comparisons.hpp"
+#include "tests/divisions.hpp"
 
 
 
 int main() {
 	constructors::test();
+	comparisons::test();
 	additions::test();
 	subtractions::test();
 	multiplications::test();
-	comparisons::test();
+	divisions::test();
 
 
 	Length_m length_m_1;

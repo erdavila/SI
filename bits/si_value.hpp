@@ -75,8 +75,10 @@ public:
 		return *this;
 	}
 
-	SIValue& operator/=(double);
-
+	SIValue& operator/=(double n) {
+		value /= n;
+		return *this;
+	}
 
 	SIValue& operator+=(const SIValue& v) {
 		value += v.value;
@@ -278,6 +280,81 @@ operator*(const SIValue<ValueType1, Ratio1, BaseUnitPowers1...>& v1,
 		ResultType;
 
 	return ResultType(v1.value * v2.value);
+}
+
+
+
+template <typename ValueType, typename Ratio, int... BaseUnitPowers>
+SIValue<typename division<ValueType, int>::type, Ratio, BaseUnitPowers...>
+operator/(const SIValue<ValueType, Ratio, BaseUnitPowers...>& v, int i) {
+	typedef
+		SIValue<typename division<ValueType, int>::type, Ratio, BaseUnitPowers...>
+		ResultType;
+	return ResultType(v.value / i);
+}
+
+
+template <typename ValueType, typename Ratio, int... BaseUnitPowers>
+SIValue<typename division<int, ValueType>::type, Ratio, BaseUnitPowers...>
+operator/(int i, const SIValue<ValueType, Ratio, BaseUnitPowers...>& v) {
+	typedef
+		SIValue<typename division<int, ValueType>::type, Ratio, BaseUnitPowers...>
+		ResultType;
+	return ResultType(i / v.value);
+}
+
+
+template <typename ValueType, typename Ratio, int... BaseUnitPowers>
+SIValue<typename division<ValueType, double>::type, Ratio, BaseUnitPowers...>
+operator/(const SIValue<ValueType, Ratio, BaseUnitPowers...>& v, double d) {
+	typedef
+		SIValue<typename division<ValueType, double>::type, Ratio, BaseUnitPowers...>
+		ResultType;
+	return ResultType(v.value / d);
+}
+
+
+template <typename ValueType, typename Ratio, int... BaseUnitPowers>
+SIValue<typename division<double, ValueType>::type, Ratio, BaseUnitPowers...>
+operator/(double d, const SIValue<ValueType, Ratio, BaseUnitPowers...>& v) {
+	typedef
+		SIValue<typename division<double, ValueType>::type, Ratio, BaseUnitPowers...>
+		ResultType;
+	return ResultType(d / v.value);
+}
+
+
+
+template <typename ValueType1, typename Ratio1,
+          typename ValueType2, typename Ratio2,
+          int... BaseUnitPowers>
+typename division<ValueType1, ValueType2>::type
+operator/(const SIValue<ValueType1, Ratio1, BaseUnitPowers...>& v1,
+          const SIValue<ValueType2, Ratio2, BaseUnitPowers...>& v2)
+{
+	/*
+	result = (v1.value * Ratio1::num / Ratio1::den) / (v2.value * Ratio2::num / Ratio2::den)
+	       = (v1.value * Ratio1::num / Ratio1::den) * (Ratio2::den / v2.value * Ratio2::num)
+	       = v1.value * Ratio1::num * Ratio2::den / (v2.value * Ratio2::num * Ratio1::den)
+	*/
+	return v1.value * Ratio1::num * Ratio2::den / (v2.value * Ratio2::num * Ratio1::den);
+}
+
+
+
+template <typename ValueType1, typename Ratio1, int... BaseUnitPowers1,
+          typename ValueType2, typename Ratio2, int... BaseUnitPowers2>
+typename division<SIValue<ValueType1, Ratio1, BaseUnitPowers1...>,
+                  SIValue<ValueType2, Ratio2, BaseUnitPowers2...>>::type
+operator/(const SIValue<ValueType1, Ratio1, BaseUnitPowers1...>& v1,
+          const SIValue<ValueType2, Ratio2, BaseUnitPowers2...>& v2)
+{
+	typedef
+		typename division<SIValue<ValueType1, Ratio1, BaseUnitPowers1...>,
+		                  SIValue<ValueType2, Ratio2, BaseUnitPowers2...>>::type
+		ResultType;
+
+	return ResultType(v1.value / v2.value);
 }
 
 

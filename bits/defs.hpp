@@ -4,7 +4,7 @@
 
 #define SI_LENGTH_mm(VALUETYPE)  SI_LENGTH_m(VALUETYPE)::with_ratio< ::std::milli>::type
 #define SI_LENGTH_cm(VALUETYPE)  SI_LENGTH_m(VALUETYPE)::with_ratio< ::std::centi>::type
-#define SI_LENGTH_m(VALUETYPE)   ::si::SIValue<VALUETYPE, ::std::ratio<1>, 1>
+#define SI_LENGTH_m(VALUETYPE)   ::si::SIValue<VALUETYPE, ::std::ratio<1>, 1, 0, 0, 0>
 #define SI_LENGTH_km(VALUETYPE)  SI_LENGTH_m(VALUETYPE)::with_ratio< ::std::kilo>::type
 
 #define SI_TIME_ns(VALUETYPE)    SI_TIME_s(VALUETYPE)::with_ratio< ::std::nano>::type
@@ -18,6 +18,8 @@
 #define SI_AREA_cm2(VALUETYPE)   ::si::multiplication<SI_LENGTH_cm(VALUETYPE), SI_LENGTH_cm(VALUETYPE)>::type
 #define SI_AREA_m2(VALUETYPE)    ::si::multiplication<SI_LENGTH_m(VALUETYPE), SI_LENGTH_m(VALUETYPE)>::type
 #define SI_AREA_km2(VALUETYPE)   ::si::multiplication<SI_LENGTH_km(VALUETYPE), SI_LENGTH_km(VALUETYPE)>::type
+
+#define SI_FREQUENCY_Hz(VALUETYPE)  ::si::division<VALUETYPE, SI_TIME_s(VALUETYPE)>::type
 
 #define SI_SPEED_m_s(VALUETYPE)  ::si::division<SI_LENGTH_m(VALUETYPE), SI_TIME_s(VALUETYPE)>::type
 
