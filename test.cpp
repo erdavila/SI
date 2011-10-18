@@ -53,6 +53,7 @@ ostream& operator<<(ostream& os, ::si::units_list<Units...> list) {
 
 #include "tests/constructors.hpp"
 #include "tests/additions.hpp"
+#include "tests/subtractions.hpp"
 #include "tests/multiplications.hpp"
 #include "tests/comparisons.hpp"
 
@@ -61,6 +62,7 @@ ostream& operator<<(ostream& os, ::si::units_list<Units...> list) {
 int main() {
 	constructors::test();
 	additions::test();
+	subtractions::test();
 	multiplications::test();
 	comparisons::test();
 

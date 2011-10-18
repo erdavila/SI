@@ -52,6 +52,14 @@ public:
 	SIValue(const ValueType& value) : value(value) {}
 
 
+	SIValue operator+() const {
+		return SIValue(+value);
+	}
+
+	SIValue operator-() const {
+		return SIValue(-value);
+	}
+
 	SIValue& operator*=(int n) {
 		value *= n;
 		return *this;
@@ -78,6 +86,17 @@ public:
 	template <typename ValueType2, typename Ratio2>
 	SIValue& operator+=(const SIValue<ValueType2, Ratio2, _BaseUnitPowers...>& v) {
 		value += convertFrom<ValueType2, Ratio2>(v.value);
+		return *this;
+	}
+
+	SIValue& operator-=(const SIValue& v) {
+		value -= v.value;
+		return *this;
+	}
+
+	template <typename ValueType2, typename Ratio2>
+	SIValue& operator-=(const SIValue<ValueType2, Ratio2, _BaseUnitPowers...>& v) {
+		value -= convertFrom<ValueType2, Ratio2>(v.value);
 		return *this;
 	}
 
@@ -289,6 +308,19 @@ operator+(const SIValue<ValueType1, Ratio1, BaseUnitPowers...>& v1,
 		  v1.value * Ratio1::num * ResultType::Ratio::den / (Ratio1::den * ResultType::Ratio::num)
 		+ v2.value * Ratio2::num * ResultType::Ratio::den / (Ratio2::den * ResultType::Ratio::num)
 	);
+}
+
+
+
+template <typename ValueType1, typename Ratio1,
+          typename ValueType2, typename Ratio2,
+          int... BaseUnitPowers>
+typename addition<SIValue<ValueType1, Ratio1, BaseUnitPowers...>,
+                  SIValue<ValueType2, Ratio2, BaseUnitPowers...>>::type
+operator-(const SIValue<ValueType1, Ratio1, BaseUnitPowers...>& v1,
+          const SIValue<ValueType2, Ratio2, BaseUnitPowers...>& v2)
+{
+	return v1 + -v2;
 }
 
 
