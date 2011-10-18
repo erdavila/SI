@@ -2,9 +2,12 @@
 #define OPERATIONS_HPP_
 
 
-
+#include <ratio>
+#include "forward.hpp"
 #include "int_list.hpp"
 
+
+namespace si {
 
 
 template <typename T1, typename T2>
@@ -15,8 +18,8 @@ struct addition {
 
 template <typename ValueType1, typename Ratio1, int... BaseUnitPowers1,
           typename ValueType2, typename Ratio2, int... BaseUnitPowers2>
-struct addition<Value<ValueType1, Ratio1, BaseUnitPowers1...>,
-                Value<ValueType2, Ratio2, BaseUnitPowers2...>>
+struct addition<SIValue<ValueType1, Ratio1, BaseUnitPowers1...>,
+                SIValue<ValueType2, Ratio2, BaseUnitPowers2...>>
 {
 private:
 	static_assert(std::is_same<int_list<BaseUnitPowers1...>,
@@ -44,8 +47,8 @@ struct multiplication {
 
 template <typename ValueType1, typename Ratio1, int... BaseUnitPowers1,
           typename ValueType2, typename Ratio2, int... BaseUnitPowers2>
-struct multiplication<Value<ValueType1, Ratio1, BaseUnitPowers1...>,
-                      Value<ValueType2, Ratio2, BaseUnitPowers2...>>
+struct multiplication<SIValue<ValueType1, Ratio1, BaseUnitPowers1...>,
+                      SIValue<ValueType2, Ratio2, BaseUnitPowers2...>>
 {
 private:
 	typedef typename multiplication<ValueType1, ValueType2>::type _NewValueType;
@@ -60,6 +63,7 @@ public:
 };
 
 
+} /* namespace si */
 
 
 #endif /* OPERATIONS_HPP_ */

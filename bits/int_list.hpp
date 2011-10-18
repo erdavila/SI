@@ -2,6 +2,8 @@
 #define INT_LIST_HPP_
 
 
+namespace si {
+
 
 template <int... Values>
 struct int_list;
@@ -51,6 +53,8 @@ struct int_list_add<int_list<>, int_list<>> {
 	static const bool empty = true;
 };
 
+
+} /* namespace si */
 
 
 #endif /* INT_LIST_HPP_ */
