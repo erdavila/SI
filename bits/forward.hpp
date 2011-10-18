@@ -1,5 +1,5 @@
-#ifndef FORWARD_HPP_
-#define FORWARD_HPP_
+#ifndef SI_FORWARD_HPP_
+#define SI_FORWARD_HPP_
 
 
 namespace si {
@@ -15,4 +15,4 @@ struct make_value;
 } /* namespace si */
 
 
-#endif /* FORWARD_HPP_ */
+#endif /* SI_FORWARD_HPP_ */

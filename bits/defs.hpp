@@ -1,5 +1,5 @@
-#ifndef DEFS_HPP_
-#define DEFS_HPP_
+#ifndef SI_DEFS_HPP_
+#define SI_DEFS_HPP_
 
 
 #define SI_LENGTH_mm(VALUETYPE)  SI_LENGTH_m(VALUETYPE)::with_ratio< ::std::milli>::type
@@ -32,4 +32,4 @@
 #define SI_ELECTRICCHARGE_C(VALUETYPE)  ::si::multiplication<SI_ELECTRICCURRENT_A(VALUETYPE), SI_TIME_s(VALUETYPE)>::type
 
 
-#endif /* DEFS_HPP_ */
+#endif /* SI_DEFS_HPP_ */

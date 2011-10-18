@@ -1,5 +1,5 @@
-#ifndef INT_LIST_HPP_
-#define INT_LIST_HPP_
+#ifndef SI_INT_LIST_HPP_
+#define SI_INT_LIST_HPP_
 
 
 namespace si {
@@ -83,7 +83,43 @@ public:
 };
 
 
+
+template <typename IntList>
+struct int_list_half;
+
+template <int HeadValue, int... TailValues>
+struct int_list_half<int_list<HeadValue, TailValues...>> {
+private:
+	static const int _head = HeadValue / 2;
+	typedef typename int_list_half<int_list<TailValues...>>::type _tail;
+
+public:
+	typedef typename _tail::template with_head<_head>::type type;
+};
+
+template <>
+struct int_list_half<int_list<>> {
+	typedef int_list<> type;
+};
+
+
+
+template <typename IntList>
+struct int_list_all_even;
+
+template <int HeadValue, int... TailValues>
+struct int_list_all_even<int_list<HeadValue, TailValues...>> {
+	static const bool value = HeadValue % 2 == 0  &&  int_list_all_even<int_list<TailValues...>>::value;
+};
+
+template<>
+struct int_list_all_even<int_list<>> {
+	static const bool value = true;
+};
+
+
+
 } /* namespace si */
 
 
-#endif /* INT_LIST_HPP_ */
+#endif /* SI_INT_LIST_HPP_ */

@@ -1,5 +1,5 @@
-#ifndef OPERATIONS_HPP_
-#define OPERATIONS_HPP_
+#ifndef SI_OPERATIONS_HPP_
+#define SI_OPERATIONS_HPP_
 
 
 #include <ratio>
@@ -88,7 +88,25 @@ public:
 };
 
 
+
+template <typename SIValue>
+struct sqrt_function {
+private:
+	typedef typename SIValue::ValueType _Ptr;
+	typedef decltype(sqrt(*static_cast<_Ptr*>(0))) _NewValueType;
+
+	typedef ::std::ratio<1> _NewRatio;
+
+	typedef typename SIValue::BaseUnitPowersList _BaseUnitPowersList;
+	typedef typename int_list_half<_BaseUnitPowersList>::type _NewBaseUnitPowersList;
+
+public:
+	typedef typename make_value<_NewValueType, _NewRatio, _NewBaseUnitPowersList>::type type;
+};
+
+
+
 } /* namespace si */
 
 
-#endif /* OPERATIONS_HPP_ */
+#endif /* SI_OPERATIONS_HPP_ */
