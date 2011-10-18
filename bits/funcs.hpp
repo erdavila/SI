@@ -3,11 +3,18 @@
 
 
 #include <cmath>
+#include "int_list.hpp"
+#include "operations.hpp"
 
 
+/// The standard C++ namespace.
 namespace std {
 
 
+/// Returns the absolute value of the SI value.
+/**
+ * @details The return type is the same as the argument.
+ */
 template <typename ValueType, typename Ratio, int... BaseUnitPowers>
 ::si::SIValue<ValueType, Ratio, BaseUnitPowers...>
 abs(const ::si::SIValue<ValueType, Ratio, BaseUnitPowers...>& v) {
@@ -19,6 +26,12 @@ abs(const ::si::SIValue<ValueType, Ratio, BaseUnitPowers...>& v) {
 }
 
 
+/// Returns the square root of the SI value argument.
+/**
+ * This function accepts only arguments where the power of the base units are
+ * even. The return type has base units with half the powers of the argument
+ * base units.
+ */
 template <typename ValueType, typename Ratio, int... BaseUnitPowers>
 typename ::si::sqrt_function< ::si::SIValue<ValueType, Ratio, BaseUnitPowers...>>::type
 sqrt(const ::si::SIValue<ValueType, Ratio, BaseUnitPowers...>& v) {

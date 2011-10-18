@@ -10,9 +10,21 @@
 namespace si {
 
 
+/// Provides the return type of the sum of two operands.
+/**
+ * @see multiplication
+ */
 template <typename T1, typename T2>
 struct addition {
-	typedef decltype(*static_cast<T1*>(0) + *static_cast<T2*>(0)) type;
+private:
+	// The implementation is on an internal struct because Doxygen was confused the other way.
+	struct _impl {
+		typedef decltype(*static_cast<T1*>(0) + *static_cast<T2*>(0)) type;
+	};
+
+public:
+	/// The resulting type of the sum of values whose types are defined by the template arguments.
+	typedef typename _impl::type type;
 };
 
 
@@ -39,10 +51,31 @@ public:
 
 
 
+
+/// Provides the return type of the product of two operands.
+/**
+ * It can be used to define derived SI units. For instance, given a @c Length_cm
+ * type which measures lengths in centimeters and an @c Area_cm2 type which
+ * measures areas in square centimeters (and is a derived SI unit itself), a new
+ * type that measures volumes in cubic centimeters can be defined this way:
+ * @code
+ *   typedef typename ::si::multiplication<Length_cm, Area_cm2>::type Volume_cm3;
+ * @endcode
+ */
 template <typename T1, typename T2>
 struct multiplication {
-	typedef decltype(*static_cast<T1*>(0) * *static_cast<T2*>(0)) type;
+private:
+	// The implementation is on an internal struct because Doxygen was confused the other way.
+	struct _impl {
+		typedef decltype(*static_cast<T1*>(0) * *static_cast<T2*>(0)) type;
+	};
+
+public:
+	/// The resulting type of the product of values whose types are defined by the template arguments.
+	typedef typename _impl::type type;
 };
+
+
 
 
 template <typename ValueType1, typename Ratio1, int... BaseUnitPowers1,
@@ -64,6 +97,16 @@ public:
 
 
 
+/// Provides the return type of the quotient of two operands.
+/**
+ * It can be used to define derived SI units. For instance, given a @c Length_cm
+ * type which measures lengths in centimeters and an @c Time_s type which
+ * measures time in seconds, a new type that measures speed in centimeters per
+ * second can be defined this way:
+ * @code
+ *   typedef typename ::si::division<Length_cm, Time_s>::type Speed_cm_s;
+ * @endcode
+ */
 template <typename T1, typename T2>
 struct division {
 	typedef decltype(*static_cast<T1*>(0) / *static_cast<T2*>(0)) type;
