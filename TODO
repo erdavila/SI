@@ -1,0 +1,19 @@
+- Turn into Makefile project
+
+- units.py must generate units.hpp, units.cpp and defs.hpp
+
+- Think about unifying units.hpp + defs.hpp
+	- How docs will become?
+
+- Implement tests for units
+	- Length_m x  =      7*m;
+	- Length_m x  =      7*km;
+	- Length_km x =      7*m;
+	- Length_km x =      7*km;
+	- Length_km x =   4321*m;
+	- Length_m x  =    7.2*m;
+	- Length_m x  =    7.2*km;
+	- Length_km x =    7.2*m;
+	- Length_km x =    7.2*km;
+	- Length_km x = 4321.2*m;
+	

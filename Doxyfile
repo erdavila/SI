@@ -542,6 +542,7 @@ WARN_LOGFILE           =
 INPUT                  = bits/si_value.hpp   \
                          bits/operations.hpp \
                          bits/defs.hpp       \
+                         bits/units.hpp      \
                          bits/funcs.hpp
 
 # This tag can be used to specify the character encoding of the source files 
@@ -1262,7 +1263,7 @@ ENABLE_PREPROCESSING   = YES
 # names in the source code. If set to NO (the default) only conditional 
 # compilation will be performed. Macro expansion can be done in a controlled 
 # way by setting EXPAND_ONLY_PREDEF to YES.
-MACRO_EXPANSION        = NO
+MACRO_EXPANSION        = YES
 
 # If the EXPAND_ONLY_PREDEF and MACRO_EXPANSION tags are both set to YES 
 # then the macro expansion is limited to the macros specified with the 

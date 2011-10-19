@@ -4,6 +4,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace si::units;
 
 
 typedef SI_LENGTH_km(int)    Length_km;

@@ -1,10 +1,14 @@
 #ifndef SI_DEFS_HPP_
 #define SI_DEFS_HPP_
 
+
+#include "si_value.hpp"
+
+
 /** @file */
 
 
-/** @name Length, Distance
+/** @name Length, distance
  * Base unit: metre (meter)<br>
  * Symbol: m
  */
@@ -18,6 +22,7 @@
 /// Length in kilometers
 #define SI_LENGTH_km(VALUETYPE)  SI_LENGTH_m(VALUETYPE)::apply_ratio< ::std::kilo>::type
 //@}
+
 
 /** @name Time
  * Base unit: second<br>
@@ -43,7 +48,7 @@
 //@}
 
 
-/** @name Electric Current
+/** @name Electric current
  * Base unit: ampere<br>
  * Symbol: A
  */
@@ -87,7 +92,7 @@
 //@}
 
 
-/** @name Speed, Velocity
+/** @name Speed, velocity
  * Derived unit: meters per second<br>
  * Symbol: m/s
  */
@@ -107,7 +112,7 @@
 //@}
 
 
-/** @name Electric Charge
+/** @name Electric charge
  * Derived unit: coulomb<br>
  * Symbol: C<br>
  * Definition: 1C = 1A . 1s
