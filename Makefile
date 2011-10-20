@@ -1,6 +1,7 @@
 OUTDIR:=out
 FLAGS:=-Wall -std=c++0x -g3 -O0
 
+UNITSFILES:=bits/defs.hpp bits/units.hpp bits/units.cpp
 
 
 .PHONY: all
@@ -11,14 +12,14 @@ all: si
 .PHONY: si
 si: $(OUTDIR)/si.o
 
-$(OUTDIR)/si.deps: bits/units.cpp
-	@ mkdir -p $(OUTDIR)
-	g++ $(FLAGS) $< -MM -MT '$(OUTDIR)/si.o $@' > $@	
-
 $(OUTDIR)/si.o: bits/units.cpp $(OUTDIR)/si.deps
 	g++ $(FLAGS) -c $< -o $@
 
-bits/defs.hpp bits/units.hpp bits/units.cpp: bits/units.py
+$(OUTDIR)/si.deps: bits/units.cpp $(UNITSFILES)
+	@ mkdir -p $(OUTDIR)
+	g++ $(FLAGS) $< -MM -MT '$(OUTDIR)/si.o $@' > $@	
+
+$(UNITSFILES): bits/units.py
 	cd bits ; python units.py
 
 -include $(OUTDIR)/si.deps
@@ -35,7 +36,7 @@ $(OUTDIR)/test:  $(OUTDIR)/si.o $(OUTDIR)/test.o
 $(OUTDIR)/test.o: test.cpp $(OUTDIR)/test.deps
 	g++ $(FLAGS) -c $< -o $@
 
-$(OUTDIR)/test.deps: test.cpp
+$(OUTDIR)/test.deps: test.cpp $(UNITSFILES)
 	@ mkdir -p $(OUTDIR)
 	g++ $(FLAGS) $< -MM -MT '$(OUTDIR)/test.o $@' > $@	
 
@@ -49,4 +50,4 @@ docs:
 
 .PHONY: clean
 clean:
-	rm -rf $(OUTDIR)
+	rm -rf $(OUTDIR) $(UNITSFILES)

@@ -1,3 +1,6 @@
+- Merge defs.hpp + units.hpp
+	- Include conditional generation of template aliases 
+
 - Implement tests for units
 	- Length_m x  =      7*m;
 	- Length_m x  =      7*km;
