@@ -1,5 +1,3 @@
-- Turn into Makefile project
-
 - units.py must generate units.hpp, units.cpp and defs.hpp
 
 - Think about unifying units.hpp + defs.hpp

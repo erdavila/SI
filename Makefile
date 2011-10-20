@@ -18,6 +18,9 @@ $(OUTDIR)/si.deps: bits/units.cpp
 $(OUTDIR)/si.o: bits/units.cpp $(OUTDIR)/si.deps
 	g++ $(FLAGS) -c $< -o $@
 
+bits/defs.hpp bits/units.hpp bits/units.cpp: bits/units.py
+	cd bits ; python units.py
+
 -include $(OUTDIR)/si.deps
 
 

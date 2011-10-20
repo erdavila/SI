@@ -10,7 +10,6 @@ namespace si {
 namespace units {
 
 
-
 /**
  * @name Length, distance
  * Base unit: meter<br>
@@ -52,7 +51,6 @@ extern const SI_AREA_m2(int) m2;
 
 } /* namespace si::units */
 } /* namespace si */
-
 
 
 #endif /* SI_UNITS_HPP_ */

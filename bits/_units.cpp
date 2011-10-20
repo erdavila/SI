@@ -5,7 +5,6 @@ namespace si {
 namespace units {
 
 
-
 const SI_LENGTH_mm(int) mm(1);
 const SI_LENGTH_cm(int) cm(1);
 const SI_LENGTH_m(int)  m (1);
