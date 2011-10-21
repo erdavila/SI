@@ -6,7 +6,7 @@ import itertools
 import re
 
 
-		
+
 def print_lines(f, line):
 	# Remove initial newline
 	if line and line[0] == '\n': line = line[1:]
@@ -132,7 +132,7 @@ def generate_units_header():
 				print_lines(f,
 						'''
 							/// 1%s (1 %s)
-							extern const %s\t%s;
+							extern constexpr %s\t%s;
 						''' % (unit.symbol, unit.singular, unit.macro('int'), unit.clean_symbol())
 					)
 						
