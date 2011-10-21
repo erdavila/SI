@@ -132,7 +132,7 @@ def generate_units_header():
 				print_lines(f,
 						'''
 							/// 1%s (1 %s)
-							extern constexpr %s\t%s;
+							extern const %s\t%s;
 						''' % (unit.symbol, unit.singular, unit.macro('int'), unit.clean_symbol())
 					)
 						

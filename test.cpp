@@ -55,6 +55,7 @@ typedef SI_FREQUENCY_Hz(double)  FrequencyDbl_Hz;
 #include "tests/multiplications.hpp"
 #include "tests/divisions.hpp"
 #include "tests/math.hpp"
+#include "tests/units.hpp"
 
 
 
@@ -66,6 +67,7 @@ int main() {
 	multiplications::test();
 	divisions::test();
 	math::test();
+	units::test();
 
 	cout << "OK" << endl;
 }

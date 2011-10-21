@@ -1,15 +1,5 @@
 - Merge defs.hpp + units.hpp
 	- Include conditional generation of template aliases 
 
-- Implement tests for units
-	- Length_m x  =      7*m;
-	- Length_m x  =      7*km;
-	- Length_km x =      7*m;
-	- Length_km x =      7*km;
-	- Length_km x =   4321*m;
-	- Length_m x  =    7.2*m;
-	- Length_m x  =    7.2*km;
-	- Length_km x =    7.2*m;
-	- Length_km x =    7.2*km;
-	- Length_km x = 4321.2*m;
-	
+- Define missing SI base and derived units.
+  
