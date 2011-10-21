@@ -2,105 +2,158 @@
 # -*- encoding: utf-8 -*-
 
 from __future__ import print_function
-from timeit import itertools
+import itertools
+import re
+
+
+		
+def print_lines(f, line):
+	# Remove initial newline
+	if line and line[0] == '\n': line = line[1:]
+	
+	m = re.match(r'\t*', line)
+	ident = m.group()
+	ident_size = len(ident)
+	
+	# Remove the identation in the first line
+	line = line[ident_size:]
+	
+	# Remove the identation in the remaining lines
+	line = line.replace('\n' + ident, '\n')
+	
+	## Remove identation
+	#line = re.sub(r'\n\t{4}', r'\n', line, flags=re.MULTILINE)
+	
+	# Remove tabs in the end
+	line = re.sub(r'\n\t+', '', line)
+	
+	print(line, file=f)
 
 
 def generate_defs():
 	with file('defs.hpp', 'w') as f:
-		def print_line(line):
-			print(line, file=f)
-		
-		print_line('#ifndef SI_DEFS_HPP_')
-		print_line('#define SI_DEFS_HPP_')
-		print_line('')
-		print_line('')
-		print_line('#include "si_value.hpp"')
-		print_line('')
-		print_line('')
-		print_line('/** @file */')
+		print_lines(f,
+			'''
+				#ifndef SI_DEFS_HPP_
+				#define SI_DEFS_HPP_
+				
+				
+				#include "si_value.hpp"
+				
+				
+				/** @file */
+			''')
 		
 		for group in Group.GROUPS:
-			print_line('')
-			print_line('')
-			print_line(group.header())
-			print_line('//@{')
+			print_lines(f,
+					'''
+						
+						
+						%s
+						//@{
+					''' % group.header()
+				)
 			
 			for unit in group.units:
-				print_line('/// %s in %s' % (group.name(), unit.plural))
-				print_line('#define %s\t%s' % (unit.macro('VALUETYPE'), unit.definition))
+				print_lines(f,
+						'''
+							/// %s in %s
+							#define %s\t%s
+						''' % (group.name(), unit.plural, unit.macro('VALUETYPE'), unit.definition)
+					)
+				
+				#print_lines('/// %s in %s' % (group.name(), unit.plural))
+				#print_lines('#define %s\t%s' % (unit.macro('VALUETYPE'), unit.definition))
 			
-			print_line('//@}')
+			print_lines(f, '//@}')
 		
-		print_line('')
-		print_line('')
-		print_line('#endif /* SI_DEFS_HPP_ */')
+		print_lines(f,
+			'''
+				
+				
+				#endif /* SI_DEFS_HPP_ */
+			''')
 		
 
-def generate_units_cpp():
+def generate_units():
 	with file('units.cpp', 'w') as f:
-		def print_line(line):
-			print(line, file=f)
-		
-		print_line('#include "units.hpp"')
-		print_line('')
-		print_line('')
-		print_line('namespace si {')
-		print_line('namespace units {')
-		print_line('')
+		print_lines(f,
+			'''
+				#include "units.hpp"
+				
+				
+				namespace si {
+				namespace units {
+				
+			''')
 		
 		for group in Group.GROUPS:
-			print_line('')
+			print_lines(f, '')
 			
 			for unit in group.units:
-				print_line('const %s\t%s(1);' % (unit.macro('int'), unit.clean_symbol()))
+				print_lines(f, 'const %s\t%s(1);' % (unit.macro('int'), unit.clean_symbol()))
 		
-		print_line('')
-		print_line('')
-		print_line('} /* namespace si::units */')
-		print_line('} /* namespace si */')
+		print_lines(f,
+			'''
+				
+				
+				} /* namespace si::units */
+				} /* namespace si */
+			''')
 		
 
-def generate_units_hpp():
+def generate_units_header():
 	with file('units.hpp', 'w') as f:
-		def print_line(line):
-			print(line, file=f)
-
-		print_line('#ifndef SI_UNITS_HPP_')
-		print_line('#define SI_UNITS_HPP_')
-		print_line('')
-		print_line('')
-		print_line('#include "defs.hpp"')
-		print_line('')
-		print_line('')
-		print_line('namespace si {')
-		print_line('/// Pre-defined unit values that help to create other values.')
-		print_line('namespace units {')
+		print_lines(f,
+			'''
+				#ifndef SI_UNITS_HPP_
+				#define SI_UNITS_HPP_
+				
+				
+				#include "defs.hpp"
+				
+				
+				namespace si {
+				/// Pre-defined unit values that help to create other values.
+				namespace units {
+			''')
 		
 		for group in Group.GROUPS:
-			print_line('')
-			print_line('')
-			print_line(group.header())
-			print_line('//@{')
+			print_lines(f,
+					'''
+						
+						
+						%s
+						//@{
+					''' % group.header()
+				)
 			
 			for unit in group.units:
-				print_line('/// 1%s (1 %s)' % (unit.symbol, unit.singular))
-				print_line('extern const %s\t%s;' % (unit.macro('int'), unit.clean_symbol()))
-			
-			print_line('//@}')
+				print_lines(f,
+						'''
+							/// 1%s (1 %s)
+							extern const %s\t%s;
+						''' % (unit.symbol, unit.singular, unit.macro('int'), unit.clean_symbol())
+					)
+						
+			print_lines(f, '//@}')
 		
-		print_line('')
-		print_line('')
-		print_line('} /* namespace si::units */')
-		print_line('} /* namespace si */')
-		print_line('')
-		print_line('')
-		print_line('#endif /* SI_UNITS_HPP_ */')
+		print_lines(f,
+			'''
+				
+				
+				} /* namespace si::units */
+				} /* namespace si */
+				
+				
+				#endif /* SI_UNITS_HPP_ */
+			''')
 		
 
 def main():
 	generate_defs()
-	generate_units_cpp()
-	generate_units_hpp()
+	generate_units()
+	generate_units_header()
 
 
 
