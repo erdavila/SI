@@ -1,5 +1,4 @@
-- Merge defs.hpp + units.hpp
-	- Include conditional generation of template aliases 
+- Include conditional generation of template aliases 
 
 - Define missing SI base and derived units.
   

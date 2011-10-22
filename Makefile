@@ -59,4 +59,4 @@ docs:
 
 .PHONY: clean
 clean:
-	rm -rf $(OUTDIR) $(UNITSFILES)
+	rm -rf $(UNITSFILES) $(OUTDIR)/ docs/

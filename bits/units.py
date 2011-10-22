@@ -3,182 +3,135 @@
 
 from __future__ import print_function
 import itertools
-import re
+import sys
 
 
 
-def print_lines(f, line):
-	# Remove initial newline
-	if line and line[0] == '\n': line = line[1:]
-	
-	m = re.match(r'\t*', line)
-	ident = m.group()
-	ident_size = len(ident)
-	
-	# Remove the identation in the first line
-	line = line[ident_size:]
-	
-	# Remove the identation in the remaining lines
-	line = line.replace('\n' + ident, '\n')
-	
-	## Remove identation
-	#line = re.sub(r'\n\t{4}', r'\n', line, flags=re.MULTILINE)
-	
-	# Remove tabs in the end
-	line = re.sub(r'\n\t+', '', line)
-	
-	print(line, file=f)
-
-
-def generate_defs():
+def generate_macros():
 	with file('defs.hpp', 'w') as f:
-		print_lines(f,
-			'''
-				#ifndef SI_DEFS_HPP_
-				#define SI_DEFS_HPP_
-				
-				
-				#include "si_value.hpp"
-				
-				
-				/** @file */
-			''')
+		sys.stdout = f
+		
+		print('#ifndef SI_DEFS_HPP_')
+		print('#define SI_DEFS_HPP_')
+		print('')
+		print('')
+		print('#include "si_value.hpp"')
+		print('')
+		print('')
+		print('/** @file */')
 		
 		for group in Group.GROUPS:
-			print_lines(f,
-					'''
-						
-						
-						%s
-						//@{
-					''' % group.header()
-				)
+			print('')
+			print('')
+			print(group.header_doc())
+			print('//@{')
 			
 			for unit in group.units:
-				print_lines(f,
-						'''
-							/// %s in %s
-							#define %s\t%s
-						''' % (group.name(), unit.plural, unit.macro('VALUETYPE'), unit.definition)
-					)
-				
-				#print_lines('/// %s in %s' % (group.name(), unit.plural))
-				#print_lines('#define %s\t%s' % (unit.macro('VALUETYPE'), unit.definition))
+				print('/// %s in %s' % (group.quantities[0].capitalize(), unit.plural))
+				print(unit.macro_definition())
 			
-			print_lines(f, '//@}')
+			print('//@}')
 		
-		print_lines(f,
-			'''
-				
-				
-				#endif /* SI_DEFS_HPP_ */
-			''')
+		print('')
+		print('')
+		print('#endif /* SI_DEFS_HPP_ */')
+		
+		sys.stdout = sys.__stdout__
 		
 
 def generate_units():
 	with file('units.cpp', 'w') as f:
-		print_lines(f,
-			'''
-				#include "units.hpp"
-				
-				
-				namespace si {
-				namespace units {
-				
-			''')
+		sys.stdout = f
+		
+		print('#include "units.hpp"')
+		print('')
+		print('')
+		print('namespace si {')
+		print('namespace units {')
+		print('')
+		
 		
 		for group in Group.GROUPS:
-			print_lines(f, '')
+			print('')
 			
 			for unit in group.units:
-				print_lines(f, 'const %s\t%s(1);' % (unit.macro('int'), unit.clean_symbol()))
+				print(unit.const_declaration())
 		
-		print_lines(f,
-			'''
-				
-				
-				} /* namespace si::units */
-				} /* namespace si */
-			''')
+		print('')
+		print('')
+		print('} /* namespace si::units */')
+		print('} /* namespace si */')
+		
+		sys.stdout = sys.__stdout__
 		
 
 def generate_units_header():
 	with file('units.hpp', 'w') as f:
-		print_lines(f,
-			'''
-				#ifndef SI_UNITS_HPP_
-				#define SI_UNITS_HPP_
-				
-				
-				#include "defs.hpp"
-				
-				
-				namespace si {
-				/// Pre-defined unit values that help to create other values.
-				namespace units {
-			''')
+		sys.stdout = f
+		
+		print('#ifndef SI_UNITS_HPP_')
+		print('#define SI_UNITS_HPP_')
+		print('')
+		print('')
+		print('#include "defs.hpp"')
+		print('')
+		print('')
+		print('namespace si {')
+		print('')
+		print('/// Pre-defined unit values that help to create other values.')
+		print('namespace units {')
 		
 		for group in Group.GROUPS:
-			print_lines(f,
-					'''
-						
-						
-						%s
-						//@{
-					''' % group.header()
-				)
+			print('')
+			print('')
+			print(group.header_doc())
+			print('//@{')
 			
 			for unit in group.units:
-				print_lines(f,
-						'''
-							/// 1%s (1 %s)
-							extern const %s\t%s;
-						''' % (unit.symbol, unit.singular, unit.macro('int'), unit.clean_symbol())
-					)
+				print('/// 1%s (1 %s)' % (unit.symbol, unit.singular))
+				print(unit.extern_const_declaration())
 						
-			print_lines(f, '//@}')
+			print('//@}')
 		
-		print_lines(f,
-			'''
-				
-				
-				} /* namespace si::units */
-				} /* namespace si */
-				
-				
-				#endif /* SI_UNITS_HPP_ */
-			''')
+		print('')
+		print('')
+		print('} /* namespace si::units */')
+		print('} /* namespace si */')
+		print('')
+		print('')
+		print('#endif /* SI_UNITS_HPP_ */')
+		
+		sys.stdout = sys.__stdout__
 		
 
 def main():
-	generate_defs()
+	generate_macros()
 	generate_units()
 	generate_units_header()
 
 
 
 class Group(object):
-	def __init__(self, is_base_unit, quantity, symbol, *units):
+	def __init__(self, is_base_unit, quantities, symbol, *units):
 		self.is_base_unit = is_base_unit
-		self.quantity = quantity
+		self.quantities = quantities
+		if isinstance(quantities, str):
+			self.quantities = [quantities]
 		self.symbol = symbol
 		self.units = units
 		for unit in units:
 			unit.group = self
 		Group.GROUPS.append(self)
 	
-	def name(self):
-		if isinstance(self.quantity, str):
-			name = self.quantity
-		else:
-			name = ', '.join(self.quantity)
-		return name.capitalize()
+	def quantities_str(self):
+		quantities = ', '.join(self.quantities)
+		return quantities
 	
-	def header(self):
+	def header_doc(self):
 		unit_name = Unit.UNITS[self.symbol].singular
 		
 		return '\n'.join([
-				'/** @name %s' % self.name(),
+				'/** @name %s' % self.quantities_str().capitalize(),
 				' * %s unit: %s<br>' % ('Base' if self.is_base_unit else 'Derived', unit_name),
 				' * Symbol: %s' % self.symbol,
 				' */'
@@ -198,12 +151,35 @@ class Unit(object):
 		Unit.UNITS[symbol] = self
 	
 	def macro(self, argument):
-		quantity = self.group.quantity
+		quantity = self.group.quantities[0]
 		if not isinstance(quantity, str):
 			quantity = quantity[0]
 		quantity = quantity.upper().replace(' ', '')
 		
 		return 'SI_%s_%s(%s)' % (quantity, self.clean_symbol(), argument)
+	
+	def macro_definition(self):
+		definition = self.definition.fmt('VALUETYPE')
+	
+		return '#define %s\t%s' % (self.macro('VALUETYPE'), definition)
+	
+	def _declaration(self):
+		return 'const %s\t%s' % (self.macro('int'), self.clean_symbol())
+	
+	def const_declaration(self):
+		return self._declaration() + '(1);'
+	
+	def extern_const_declaration(self):
+		return 'extern ' + self._declaration() + ';'
+
+	def type_decl(self, valuetype=None):
+		name_parts = self.group.quantities[0].split(' ')
+		name = ''.join(name_part.capitalize() for name_part in name_parts)
+		
+		result = name + '_' + self.clean_symbol()
+		if valuetype is not None:
+			result += '<' + valuetype + '>'
+		return result
 	
 	def clean_symbol(self):
 		return self.symbol.replace('μ', 'u').replace('/', '_').replace('²', '2').replace('³', '3')
@@ -215,21 +191,27 @@ class SIValue(object):
 	def __init__(self, *unit_powers):
 		self.unit_powers = unit_powers
 	
-	def __str__(self):
-		return '::si::SIValue<VALUETYPE, ::std::ratio<1>, %s>' % ', '.join(str(i) for i in itertools.islice(itertools.chain(self.unit_powers, itertools.repeat(0)), 7))
-
+	def fmt(self, valuetype_var):
+		powers = itertools.islice(itertools.chain(self.unit_powers, itertools.repeat(0)), 7)
+		powers = ', '.join(str(i) for i in powers)
+		return '::si::SIValue<%s, ::std::ratio<1>, %s>' % (valuetype_var, powers)
+	
 
 class ApplyRatio(object):
 	def __init__(self, from_symbol, ratio):
 		self.from_symbol = from_symbol
 		self.ratio = ratio
 	
-	def __str__(self):
+	def fmt(self, valuetype_var):
 		ratio = self.ratio
 		if isinstance(ratio, int):
 			ratio = ' ::std::ratio<%d>' % ratio
 		
-		return '%s::apply_ratio<%s>::type' % (Unit.UNITS[self.from_symbol].macro('VALUETYPE'), ratio)
+		unit = Unit.UNITS[self.from_symbol]
+		
+		from_ = unit.macro(valuetype_var)
+		
+		return '%s::apply_ratio<%s>::type' % (from_, ratio)
 
 
 class TypeOperation(object):
@@ -237,10 +219,17 @@ class TypeOperation(object):
 		self.symbol1 = symbol1
 		self.symbol2 = symbol2
 
-	def __str__(self):
-		macro1 = 'VALUETYPE' if self.symbol1 is None else Unit.UNITS[self.symbol1].macro('VALUETYPE')
-		macro2 = 'VALUETYPE' if self.symbol2 is None else Unit.UNITS[self.symbol2].macro('VALUETYPE')
-		return '::si::%s<%s, %s>::type' % (self.operation(), macro1, macro2)
+	def fmt(self, valuetype):
+		type1 = self._get_type(self.symbol1, valuetype)
+		type2 = self._get_type(self.symbol2, valuetype)
+		return '::si::%s<%s, %s>::type' % (self.operation(), type1, type2)
+	
+	def _get_type(self, symbol, valuetype):
+		if symbol is None:
+			return valuetype
+		else:
+			unit = Unit.UNITS[symbol]
+			return unit.macro(valuetype)
 
 
 class Multiplication(TypeOperation):
