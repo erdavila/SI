@@ -1,7 +1,7 @@
 OUTDIR:=out
 FLAGS:=-Wall -std=c++0x -g3 -O0
 
-UNITSFILES:=bits/defs.hpp bits/units.hpp bits/units.cpp
+UNITSFILES:=bits/types.hpp bits/defs.hpp bits/units.hpp bits/units.cpp
 
 
 

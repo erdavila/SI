@@ -543,6 +543,7 @@ INPUT                  = bits/si_value.hpp   \
                          bits/operations.hpp \
                          bits/defs.hpp       \
                          bits/units.hpp      \
+                         bits/types.hpp      \
                          bits/funcs.hpp
 
 # This tag can be used to specify the character encoding of the source files 

@@ -6,6 +6,58 @@ import sys
 from fractions import Fraction
 
 
+TEMPLATE_ALIASES = True
+
+
+def generate_types():
+	with file('types.hpp', 'w') as f:
+		sys.stdout = f
+		
+		print('#ifndef SI_TYPES_HPP_')
+		print('#define SI_TYPES_HPP_')
+		print('')
+		print('')
+		
+		if TEMPLATE_ALIASES:
+		
+			print('#include "si_value.hpp"')
+			print('')
+			print('')
+			print('/** @file */')
+			print('')
+			print('')
+			print('namespace si {')
+			
+			for unit in UNITS:
+				print('')
+				print('')
+				print(unit.header_doc())
+				print('//@{')
+				
+				multiples_symbols = [unit.symbol] + [multiple.symbol() for multiple in unit.multiples if multiple.symbol() != unit.symbol]
+				for multiple_symbol in multiples_symbols:
+					multiple = ALL_MULTIPLES[multiple_symbol]
+					print('/// %s in %s' % (unit.quantities[0].capitalize(), multiple.name_plural()))
+					print('template <typename ValueType> using %s = %s;' % (multiple.type_name(), multiple.definition_str))
+				
+				print('//@}')
+			
+			print('')
+			print('')
+			print('} /* namespace si */')
+			
+		else:
+			print('/*')
+			print(' * This file is empty because compilation of template aliases was disabled.')
+			print(' */')
+		
+		print('')
+		print('')
+		print('#endif /* SI_TYPES_HPP_ */')
+		
+		sys.stdout = sys.__stdout__
+		
+
 def generate_macros():
 	with file('defs.hpp', 'w') as f:
 		sys.stdout = f
@@ -46,7 +98,10 @@ def generate_units_header():
 		print('#define SI_UNITS_HPP_')
 		print('')
 		print('')
-		print('#include "defs.hpp"')
+		if TEMPLATE_ALIASES:
+			print('#include "types.hpp"')
+		else:
+			print('#include "defs.hpp"')
 		print('')
 		print('')
 		print('namespace si {')
@@ -104,6 +159,7 @@ def generate_units():
 		
 
 def main():
+	generate_types()
 	generate_macros()
 	generate_units_header()
 	generate_units()
@@ -183,13 +239,22 @@ class UnitMultiple(object):
 		return 'SI_%s_%s' % (self.unit.quantities[0].replace(' ', '').upper(), self.clean_symbol())
 	
 	def macro_definition(self):
-		return self.definition_str
+		if TEMPLATE_ALIASES:
+			return '::si::%s<ValueType>' % self.type_name()
+		else:
+			return self.definition_str
 		
 	def const_declaration(self):
-		return self.macro_name() + '(int)'
+		if TEMPLATE_ALIASES:
+			return self.type_name() + '<int>'
+		else:
+			return self.macro_name() + '(int)'
 	
 	def definition_from(self):
-		return '%s(ValueType)' % self.macro_name()
+		if TEMPLATE_ALIASES:
+			return '::si::%s<ValueType>' % self.type_name()
+		else:
+			return '%s(ValueType)' % self.macro_name()
 
 
 
@@ -222,7 +287,7 @@ class Unit(object):
 									symbol=p.symbol + self.symbol,
 									name=prefix + self.name(),
 									name_plural=prefix + self.name_plural(),
-									definition_str='%s::apply_ratio< ::std::%s>::type' % (definition_from, prefix),
+									definition_str='typename %s::%sapply_ratio< ::std::%s>::type' % (definition_from, 'template ' if TEMPLATE_ALIASES else '', prefix),
 								)
 				elif isinstance(multiple_spec, Ratio):
 					ratio = multiple_spec
@@ -236,7 +301,7 @@ class Unit(object):
 									symbol=ratio.symbol,
 									name=ratio.name,
 									name_plural=ratio.name + 's',
-									definition_str='%s::apply_ratio< ::std::ratio<%s>>::type' % (definition_from, ratio_str),
+									definition_str='typename %s::%sapply_ratio< ::std::ratio<%s>>::type' % (definition_from, 'template ' if TEMPLATE_ALIASES else '', ratio_str),
 								)
 				elif isinstance(multiple_spec, Definition):
 					definition = multiple_spec
@@ -387,7 +452,7 @@ class Multiplication(BinaryOperation):
 	def str(self):
 		type1 = self.operand1().definition_from()
 		type2 = self.operand2().definition_from()
-		return '::si::multiplication< %s, %s>::type' % (type1, type2)
+		return '%s::si::multiplication< %s, %s>::type' % ('typename ' if TEMPLATE_ALIASES else '', type1, type2)
 
 
 class Square(Multiplication):
@@ -444,7 +509,7 @@ class Division(BinaryOperation):
 		else:
 			t1 = self.operand1().definition_from()
 		
-		return '::si::division< %s, %s>::type' % (t1, self.operand2().definition_from())
+		return '%s::si::division< %s, %s>::type' % ('typename ' if TEMPLATE_ALIASES else '', t1, self.operand2().definition_from())
 
 
 ################################################################################
