@@ -245,11 +245,25 @@ class Division(TypeOperation):
 
 ##### UNITS ####################################################################
 
+# Base units #
+
 Group(True, ['length', 'distance'], 'm',
+	Unit('nm',  'nanometer',  'nanometers', ApplyRatio('m', ' ::std::nano')),
+	Unit('μm', 'micrometer', 'micrometers', ApplyRatio('m', ' ::std::micro')),
 	Unit('mm', 'millimeter', 'millimeters', ApplyRatio('m', ' ::std::milli')),
 	Unit('cm', 'centimeter', 'centimeters', ApplyRatio('m', ' ::std::centi')),
 	Unit('m' ,      'meter',      'meters', SIValue(1)),
 	Unit('km',  'kilometer',  'kilometers', ApplyRatio('m', ' ::std::kilo')),
+)
+
+Group(True, 'mass', 'g',
+	Unit('pg',  'picogram',  'picograms', ApplyRatio('g', ' ::std::pico')),
+	Unit('ng',  'nanogram',  'nanograms', ApplyRatio('g', ' ::std::nano')),
+	Unit('μg', 'microgram', 'micrograms', ApplyRatio('g', ' ::std::micro')),
+	Unit('mg', 'milligram', 'milligrams', ApplyRatio('g', ' ::std::milli')),
+	Unit('cg', 'centigram', 'centigrams', ApplyRatio('g', ' ::std::centi')),
+	Unit( 'g',      'gram',      'grams', SIValue(0, 1)),
+	Unit('kg',  'kilogram',  'kilograms', ApplyRatio('g', ' ::std::kilo')),
 )
 
 Group(True, 'time', 's',
@@ -263,8 +277,24 @@ Group(True, 'time', 's',
 )
 
 Group(True, 'electric current', 'A',
-	Unit('A', 'ampere', 'amperes', SIValue(0, 0, 0, 1)),
+	Unit('mA', 'milliampere', 'milliamperes', ApplyRatio('A', ' ::std::milli')),
+	Unit( 'A',      'ampere',      'amperes', SIValue(0, 0, 0, 1)),
 )
+
+Group(True, 'temperature', 'K',
+	Unit('K', 'kelvin', 'kelvins', SIValue(0, 0, 0, 0, 1)),
+)
+
+Group(True, 'luminous intensity', 'cd',
+	Unit('cd', 'candela', 'candelas', SIValue(0, 0, 0, 0, 0, 1)),
+)
+
+Group(True, 'amount of substance', 'mol',
+	Unit('mol', 'mole', 'moles', SIValue(0, 0, 0, 0, 0, 0, 1)),
+)
+
+
+# Derived units #
 
 Group(False, 'area', 'm²',
 	Unit('cm²', 'square centimeter', 'square centimeters', Multiplication('cm', 'cm')),
