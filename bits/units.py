@@ -314,12 +314,66 @@ Group(False, 'acceleration', 'm/s²',
 	Unit('m/s²', 'meter per second squared', 'meters per second squared', Division('m/s', 's'))
 )
 
+Group(False, ['force', 'weight'], 'N',
+	Unit('N', 'newton', 'newtons', Multiplication('kg', 'm/s²'))
+)
+
+Group(False, ['pressure', 'stress'], 'Pa',
+	Unit( 'Pa',      'pascal',      'pascals', Division('N', 'm²')),
+	Unit('hPa', 'hectopascal', 'hectopascals', ApplyRatio('Pa', ' ::std::hecto')),
+	Unit('kPa',  'kilopascal',  'kilopascals', ApplyRatio('Pa', ' ::std::kilo')),
+	Unit('MPa',  'megapascal',  'megapascals', ApplyRatio('Pa', ' ::std::mega')),
+	Unit('GPa',  'gigapascal',  'gigapascals', ApplyRatio('Pa', ' ::std::giga')),
+)
+
+Group(False, ['energy', 'work', 'heat'], 'J',
+	Unit('pJ',  'picojoule',  'picojoules', ApplyRatio('J', ' ::std::pico')),
+	Unit('nJ',  'nanojoule',  'nanojoules', ApplyRatio('J', ' ::std::nano')),
+	Unit('μJ', 'microjoule', 'microjoules', ApplyRatio('J', ' ::std::micro')),
+	Unit('mJ', 'millijoule', 'millijoules', ApplyRatio('J', ' ::std::milli')),
+	Unit( 'J',      'joule',      'joules', Multiplication('N', 'm')),
+	Unit('kJ',  'kilojoule',  'kilojoules', ApplyRatio('J', ' ::std::kilo')),
+	Unit('MJ',  'megajoule',  'megajoules', ApplyRatio('J', ' ::std::mega')),
+	Unit('GJ',  'gigajoule',  'gigajoules', ApplyRatio('J', ' ::std::giga')),
+	Unit('TJ',  'terajoule',  'terajoules', ApplyRatio('J', ' ::std::tera')),
+)
+
+Group(False, 'power', 'W',
+	Unit('pW',  'picowatt',  'picowatts', ApplyRatio('W', ' ::std::pico')),
+	Unit('nW',  'nanowatt',  'nanowatts', ApplyRatio('W', ' ::std::nano')),
+	Unit('μW', 'microwatt', 'microwatts', ApplyRatio('W', ' ::std::micro')),
+	Unit('mW', 'milliwatt', 'milliwatts', ApplyRatio('W', ' ::std::milli')),
+	Unit( 'W',      'watt',      'watts', Division('J', 's')),
+	Unit('kW',  'kilowatt',  'kilowatts', ApplyRatio('W', ' ::std::kilo')),
+	Unit('MW',  'megawatt',  'megawatts', ApplyRatio('W', ' ::std::mega')),
+	Unit('GW',  'gigawatt',  'gigawatts', ApplyRatio('W', ' ::std::giga')),
+	Unit('TW',  'terawatt',  'terawatts', ApplyRatio('W', ' ::std::tera')),
+)
+
 Group(False, 'electric charge', 'C',
-	Unit('C', 'coulomb', 'coulombs', Multiplication('A', 's'))
+	Unit('pC',  'picocoulomb',  'picocoulombs', ApplyRatio('C', ' ::std::pico')),
+	Unit('nC',  'nanocoulomb',  'nanocoulombs', ApplyRatio('C', ' ::std::nano')),
+	Unit('μC', 'microcoulomb', 'microcoulombs', ApplyRatio('C', ' ::std::micro')),
+	Unit('mC', 'millicoulomb', 'millicoulombs', ApplyRatio('C', ' ::std::milli')),
+	Unit( 'C',      'coulomb',      'coulombs', Multiplication('A', 's')),
+)
+
+Group(False, ['voltage', 'electrical potential difference'], 'V',
+	Unit('mV', 'millivolt', 'millivolts', ApplyRatio('V', ' ::std::milli')),
+	Unit( 'V',      'volt',      'volts', Division('W', 'A')),
+	Unit('kV',  'kilovolt',  'kilovolts', ApplyRatio('V', ' ::std::kilo')),
+	Unit('MV',  'megavolt',  'megavolts', ApplyRatio('V', ' ::std::mega')),
+)
+
+Group(False, 'electric capacitance', 'F',
+	Unit('pF',  'picofarad',  'picofarads', ApplyRatio('F', ' ::std::pico')),
+	Unit('nF',  'nanofarad',  'nanofarads', ApplyRatio('F', ' ::std::nano')),
+	Unit('μF', 'microfarad', 'microfarads', ApplyRatio('F', ' ::std::micro')),
+	Unit( 'F',      'farad',      'farads', Division('C', 'V')),
 )
 
 Group(False, 'frequency', 'Hz',
-	Unit('Hz', 'hertz', 'hertz', Division(None, 's'))
+	Unit('Hz', 'hertz', 'hertz', Division(None, 's')),
 )
 
 
