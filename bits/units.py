@@ -2,9 +2,7 @@
 # -*- encoding: utf-8 -*-
 
 from __future__ import print_function
-import itertools
 import sys
-
 
 
 def generate_macros():
@@ -20,47 +18,21 @@ def generate_macros():
 		print('')
 		print('/** @file */')
 		
-		for group in Group.GROUPS:
+		for unit in UNITS:
 			print('')
 			print('')
-			print(group.header_doc())
+			print(unit.header_doc())
 			print('//@{')
 			
-			for unit in group.units:
-				print('/// %s in %s' % (group.quantities[0].capitalize(), unit.plural))
-				print(unit.macro_definition())
-			
+			for variant in unit.variants:
+				print('/// %s in %s' % (unit.quantities[0].capitalize(), variant.name_plural()))
+				print('#define %s(ValueType)\t%s' % (variant.macro_name(), variant.macro_definition()))
+	
 			print('//@}')
 		
 		print('')
 		print('')
 		print('#endif /* SI_DEFS_HPP_ */')
-		
-		sys.stdout = sys.__stdout__
-		
-
-def generate_units():
-	with file('units.cpp', 'w') as f:
-		sys.stdout = f
-		
-		print('#include "units.hpp"')
-		print('')
-		print('')
-		print('namespace si {')
-		print('namespace units {')
-		print('')
-		
-		
-		for group in Group.GROUPS:
-			print('')
-			
-			for unit in group.units:
-				print(unit.const_declaration())
-		
-		print('')
-		print('')
-		print('} /* namespace si::units */')
-		print('} /* namespace si */')
 		
 		sys.stdout = sys.__stdout__
 		
@@ -81,15 +53,15 @@ def generate_units_header():
 		print('/// Pre-defined unit values that help to create other values.')
 		print('namespace units {')
 		
-		for group in Group.GROUPS:
+		for unit in UNITS:
 			print('')
 			print('')
-			print(group.header_doc())
+			print(unit.header_doc())
 			print('//@{')
 			
-			for unit in group.units:
-				print('/// 1%s (1 %s)' % (unit.symbol, unit.singular))
-				print(unit.extern_const_declaration())
+			for variant in unit.variants:
+				print('/// 1%s (1 %s)' % (variant.symbol(), variant.name()))
+				print('extern const %s\t%s;' % (variant.const_declaration(), variant.clean_symbol()))
 						
 			print('//@}')
 		
@@ -104,276 +76,471 @@ def generate_units_header():
 		sys.stdout = sys.__stdout__
 		
 
+def generate_units():
+	with file('units.cpp', 'w') as f:
+		sys.stdout = f
+		
+		print('#include "units.hpp"')
+		print('')
+		print('')
+		print('namespace si {')
+		print('namespace units {')
+		print('')
+		
+		
+		for unit in UNITS:
+			print('')
+			
+			for variant in unit.variants:
+				print('const %s\t%s(1);' % (variant.const_declaration(), variant.clean_symbol()))
+		
+		print('')
+		print('')
+		print('} /* namespace si::units */')
+		print('} /* namespace si */')
+		
+		sys.stdout = sys.__stdout__
+		
+
 def main():
 	generate_macros()
-	generate_units()
 	generate_units_header()
+	generate_units()
 
 
+################################################################################
 
-class Group(object):
-	def __init__(self, is_base_unit, quantities, symbol, *units):
-		self.is_base_unit = is_base_unit
-		self.quantities = quantities
-		if isinstance(quantities, str):
-			self.quantities = [quantities]
+UNITS = []
+UNITS_BY_SYMBOL = {}
+
+VARIANTS = {}
+
+
+class Prefix(object):
+	def __init__(self, symbol):
 		self.symbol = symbol
-		self.units = units
-		for unit in units:
-			unit.group = self
-		Group.GROUPS.append(self)
+
+PREFIXES = {
+		'pico' : Prefix('p'),
+		'nano' : Prefix('n'),
+		'micro': Prefix('μ'),
+		'milli': Prefix('m'),
+		'centi': Prefix('c'),
+		'hecto': Prefix('h'),
+		'kilo' : Prefix('k'),
+		'mega' : Prefix('M'),
+		'giga' : Prefix('G'),
+		'tera' : Prefix('T'),
+}
+
+
+SELF = object()
+
+
+
+class UnitVariant(object):
 	
-	def quantities_str(self):
-		quantities = ', '.join(self.quantities)
-		return quantities
+	def __init__(self, unit, symbol, name, name_plural, definition_str):
+		self.unit = unit
+		self._symbol = symbol
+		self._name = name
+		self._name_plural = name_plural
+		self.definition_str = definition_str
+	
+	def symbol(self):
+		return self._symbol
+	
+	def name(self):
+		return self._name
+	
+	def name_plural(self):
+		return self._name_plural
+	
+	def clean_symbol(self):
+		return self._symbol.replace('μ', 'u').replace('/', '_').replace('²', '2').replace('³', '3')
+	
+	def type_name(self):
+		name_parts = self.unit.quantities[0].split(' ')
+		type_name = ''.join(name_part.capitalize() for name_part in name_parts)
+		return type_name + '_' + self.clean_symbol()
+	
+	def macro_name(self):
+		return 'SI_%s_%s' % (self.unit.quantities[0].replace(' ', '').upper(), self.clean_symbol())
+	
+	def macro_definition(self):
+		return self.definition_str
+		
+	def const_declaration(self):
+		return self.macro_name() + '(int)'
+	
+	def definition_from(self):
+		return '%s(ValueType)' % self.macro_name()
+
+
+
+class Unit(object):
+	
+	def __init__(self, is_base_unit, quantities, symbol):
+		self._is_base_unit = True
+		self.quantities = quantities
+		self.symbol = symbol
+		
+		UNITS.append(self)
+		UNITS_BY_SYMBOL[symbol] = self
+	
+	def process_variants(self, variants_specs, main_variant):
+		if variants_specs is None:
+			self.variants = [main_variant]
+			VARIANTS[main_variant.symbol()] = main_variant
+		else:
+			self.variants = []
+			for variant_spec in variants_specs:
+				if variant_spec is SELF:
+					variant = main_variant
+				elif isinstance(variant_spec, str):
+					prefix = variant_spec
+					p = PREFIXES[prefix]
+					definition_from = main_variant.definition_from()
+					variant = UnitVariant(
+									unit=self,
+									symbol=p.symbol + self.symbol,
+									name=prefix + self.name(),
+									name_plural=prefix + self.name_plural(),
+									definition_str='%s::apply_ratio< ::std::%s>::type' % (definition_from, prefix),
+								)
+				elif isinstance(variant_spec, Ratio):
+					ratio = variant_spec
+					definition_from = main_variant.definition_from()
+					variant = UnitVariant(
+									unit=self,
+									symbol=ratio.symbol,
+									name=ratio.name,
+									name_plural=ratio.name + 's',
+									definition_str='%s::apply_ratio< ::std::ratio<%d>>::type' % (definition_from, ratio.multiplier),
+								)
+				elif isinstance(variant_spec, Definition):
+					definition = variant_spec
+					variant = UnitVariant(
+									unit=self,
+									symbol=definition.symbol(),
+									name=definition.name(),
+									name_plural=definition.name_plural(),
+									definition_str=definition.str()
+								)
+				else:
+					raise NotImplementedError(variant_spec)
+	
+				self.variants.append(variant)
+				VARIANTS[variant.symbol()] = variant
+	
 	
 	def header_doc(self):
-		unit_name = Unit.UNITS[self.symbol].singular
-		
 		return '\n'.join([
-				'/** @name %s' % self.quantities_str().capitalize(),
-				' * %s unit: %s<br>' % ('Base' if self.is_base_unit else 'Derived', unit_name),
+				'/**',
+				' * @name %s' % self.quantities_str().capitalize(),
+				' * %s unit: %s<br>' % ('Base' if self._is_base_unit else 'Derived', self.name()),
 				' * Symbol: %s' % self.symbol,
 				' */'
 			])
 	
-	GROUPS = []
+	def quantities_str(self):
+		return ', '.join(self.quantities)
 
 
-class Unit(object):
-	def __init__(self, symbol, singular, plural, definition):
-		self.symbol = symbol
-		self.singular = singular
-		self.plural = plural
+
+class BaseUnit(Unit):
+	
+	def __init__(self, index, quantities, symbol, name, variants=None):
+		super(BaseUnit, self).__init__(True, quantities, symbol)
+		
+		self._name = name
+		self._name_plural = name + 's'
+		
+		base_unit_powers = [0] * 7
+		base_unit_powers[index] = 1
+		
+		main_variant = UnitVariant(
+							unit=self,
+							symbol=symbol,
+							name=name,
+							name_plural=name + 's',
+							definition_str='::si::SIValue<ValueType, ::std::ratio<1>, %s>' % ', '.join(str(power) for power in base_unit_powers)
+						)
+		
+		variants_specs = variants
+		self.process_variants(variants_specs, main_variant)
+	
+	
+	def name(self):
+		return self._name
+		
+	def name_plural(self):
+		return self._name_plural
+		
+
+
+class DerivedUnit(Unit):
+	def __init__(self, quantities, definition, symbol=None, name=None, name_plural=None, variants=None):
+		if symbol is None: symbol = definition.symbol()
+		super(DerivedUnit, self).__init__(False, quantities, symbol)
+		
+		if name is None:
+			name        = definition.name()
+			name_plural = definition.name_plural()
+		elif name_plural is None:
+			name_plural = name + 's'
+		
 		self.definition = definition
-		if symbol in Unit.UNITS:
-			raise Exception(symbol)
-		Unit.UNITS[symbol] = self
-	
-	def macro(self, argument):
-		quantity = self.group.quantities[0]
-		if not isinstance(quantity, str):
-			quantity = quantity[0]
-		quantity = quantity.upper().replace(' ', '')
+		self._name = name
+		self._name_plural = name_plural
 		
-		return 'SI_%s_%s(%s)' % (quantity, self.clean_symbol(), argument)
-	
-	def macro_definition(self):
-		definition = self.definition.fmt('VALUETYPE')
-	
-		return '#define %s\t%s' % (self.macro('VALUETYPE'), definition)
-	
-	def _declaration(self):
-		return 'const %s\t%s' % (self.macro('int'), self.clean_symbol())
-	
-	def const_declaration(self):
-		return self._declaration() + '(1);'
-	
-	def extern_const_declaration(self):
-		return 'extern ' + self._declaration() + ';'
-
-	def type_decl(self, valuetype=None):
-		name_parts = self.group.quantities[0].split(' ')
-		name = ''.join(name_part.capitalize() for name_part in name_parts)
+		main_variant = UnitVariant(
+							unit=self,
+							symbol=symbol,
+							name=name,
+							name_plural=name_plural,
+							definition_str=definition.str()
+						)
 		
-		result = name + '_' + self.clean_symbol()
-		if valuetype is not None:
-			result += '<' + valuetype + '>'
-		return result
+		variants_specs = variants
+		self.process_variants(variants_specs, main_variant)
 	
-	def clean_symbol(self):
-		return self.symbol.replace('μ', 'u').replace('/', '_').replace('²', '2').replace('³', '3')
+	def name(self):
+		return self._name
 	
-	UNITS = {}
+	def name_plural(self):
+		return self._name_plural
 
 
-class SIValue(object):
-	def __init__(self, *unit_powers):
-		self.unit_powers = unit_powers
-	
-	def fmt(self, valuetype_var):
-		powers = itertools.islice(itertools.chain(self.unit_powers, itertools.repeat(0)), 7)
-		powers = ', '.join(str(i) for i in powers)
-		return '::si::SIValue<%s, ::std::ratio<1>, %s>' % (valuetype_var, powers)
-	
 
-class ApplyRatio(object):
-	def __init__(self, from_symbol, ratio):
-		self.from_symbol = from_symbol
-		self.ratio = ratio
-	
-	def fmt(self, valuetype_var):
-		ratio = self.ratio
-		if isinstance(ratio, int):
-			ratio = ' ::std::ratio<%d>' % ratio
-		
-		unit = Unit.UNITS[self.from_symbol]
-		
-		from_ = unit.macro(valuetype_var)
-		
-		return '%s::apply_ratio<%s>::type' % (from_, ratio)
+class Ratio(object):
+	def __init__(self, multiplier, symbol, name):
+		self.multiplier = multiplier
+		self.symbol = symbol
+		self.name = name
 
 
-class TypeOperation(object):
-	def __init__(self, symbol1, symbol2):
-		self.symbol1 = symbol1
-		self.symbol2 = symbol2
 
-	def fmt(self, valuetype):
-		type1 = self._get_type(self.symbol1, valuetype)
-		type2 = self._get_type(self.symbol2, valuetype)
-		return '::si::%s<%s, %s>::type' % (self.operation(), type1, type2)
+class Definition(object):
+	def name_plural(self):
+		return self.name() + 's'
 	
-	def _get_type(self, symbol, valuetype):
-		if symbol is None:
-			return valuetype
+	def definition_from(self):
+		symbol = self.symbol()
+		if symbol in VARIANTS:
+			return VARIANTS[symbol].definition_from()
 		else:
-			unit = Unit.UNITS[symbol]
-			return unit.macro(valuetype)
+			return self.str()
 
 
-class Multiplication(TypeOperation):
-	def operation(self):
-		return 'multiplication'
+class BinaryOperation(Definition):
+	def __init__(self, operand1, operand2):
+		self._operand1 = operand1
+		self._operand2 = operand2
+	
+	def operand1(self):
+		return VARIANTS[self._operand1] if isinstance(self._operand1, str) else self._operand1
+	
+	def operand2(self):
+		return VARIANTS[self._operand2] if isinstance(self._operand2, str) else self._operand2
 
 
-class Division(TypeOperation):
-	def operation(self):
-		return 'division'
+class Multiplication(BinaryOperation):
+	def __init__(self, from_symbol1, from_symbol2):
+		super(Multiplication, self).__init__(from_symbol1, from_symbol2)
+	
+	def name(self):
+		return self.operand1().name() + ' ' + self.operand2().name()
+	
+	def str(self):
+		type1 = self.operand1().definition_from()
+		type2 = self.operand2().definition_from()
+		return '::si::multiplication< %s, %s>::type' % (type1, type2)
+
+
+class Square(Multiplication):
+	def __init__(self, from_symbol):
+		super(Square, self).__init__(from_symbol, from_symbol)
+		self.from_symbol = from_symbol
+	
+	def symbol(self):
+		return self.from_symbol + '²'
+	
+	def name(self):
+		variant = VARIANTS[self.from_symbol]
+		return 'square ' + variant.name()
 	
 
+class Cube(Multiplication):
+	def __init__(self, from_symbol):
+		super(Cube, self).__init__(Square(from_symbol).symbol(), from_symbol)
+		self.from_symbol = from_symbol
+	
+	def symbol(self):
+		return self.from_symbol + '³'
+	
+	def name(self):
+		variant = VARIANTS[self.from_symbol]
+		return 'cubic ' + variant.name()
+	
 
-##### UNITS ####################################################################
+class Division(BinaryOperation):
+	def __init__(self, operand1, operand2):
+		super(Division, self).__init__(operand1, operand2)
+	
+	def symbol(self):
+		return self.operand1().symbol() + '/' + self.operand2().symbol()
+	
+	def name(self):
+		return self.operand1().name() + ' per ' + self.operand2().name()
+	
+	def name_plural(self):
+		return self.operand1().name_plural() + ' per ' + self.operand2().name()
+	
+	def str(self):
+		if self._operand1 is 1:
+			t1 = 'ValueType'
+		else:
+			t1 = self.operand1().definition_from()
+		
+		return '::si::division< %s, %s>::type' % (t1, self.operand2().definition_from())
 
-# Base units #
 
-Group(True, ['length', 'distance'], 'm',
-	Unit('nm',  'nanometer',  'nanometers', ApplyRatio('m', ' ::std::nano')),
-	Unit('μm', 'micrometer', 'micrometers', ApplyRatio('m', ' ::std::micro')),
-	Unit('mm', 'millimeter', 'millimeters', ApplyRatio('m', ' ::std::milli')),
-	Unit('cm', 'centimeter', 'centimeters', ApplyRatio('m', ' ::std::centi')),
-	Unit('m' ,      'meter',      'meters', SIValue(1)),
-	Unit('km',  'kilometer',  'kilometers', ApplyRatio('m', ' ::std::kilo')),
+################################################################################
+
+
+BaseUnit(0,
+	quantities=['length', 'distance'],
+	symbol='m',
+	name='meter',
+	variants=['nano', 'micro', 'milli', 'centi', SELF, 'kilo']
 )
 
-Group(True, 'mass', 'g',
-	Unit('pg',  'picogram',  'picograms', ApplyRatio('g', ' ::std::pico')),
-	Unit('ng',  'nanogram',  'nanograms', ApplyRatio('g', ' ::std::nano')),
-	Unit('μg', 'microgram', 'micrograms', ApplyRatio('g', ' ::std::micro')),
-	Unit('mg', 'milligram', 'milligrams', ApplyRatio('g', ' ::std::milli')),
-	Unit('cg', 'centigram', 'centigrams', ApplyRatio('g', ' ::std::centi')),
-	Unit( 'g',      'gram',      'grams', SIValue(0, 1)),
-	Unit('kg',  'kilogram',  'kilograms', ApplyRatio('g', ' ::std::kilo')),
+BaseUnit(1,
+	quantities=['mass'],
+	symbol='g',
+	name='gram',
+	variants=['pico', 'nano', 'micro', 'milli', 'centi', SELF, 'kilo']
 )
 
-Group(True, 'time', 's',
-	Unit('ns' ,  'nanosecond',  'nanoseconds', ApplyRatio('s', ' ::std::nano')),
-	Unit('μs' , 'microsecond', 'microseconds', ApplyRatio('s', ' ::std::micro')),
-	Unit('ms' , 'millisecond', 'milliseconds', ApplyRatio('s', ' ::std::milli')),
-	Unit('s'  ,      'second',      'seconds', SIValue(0, 0, 1)),
-	Unit('min',      'minute',      'minutes', ApplyRatio('s'  , 60)),
-	Unit('h'  ,        'hour',        'hours', ApplyRatio('min', 60)),
-	Unit('d'  ,         'day',         'days', ApplyRatio('h'  , 24)),
+BaseUnit(2,
+	quantities=['time'],
+	symbol='s',
+	name='second',
+	variants=['nano', 'micro', 'milli', SELF,
+			Ratio(      60, symbol='min', name='minute'),
+			Ratio(   60*60, symbol='h'  , name='hour'),
+			Ratio(24*60*60, symbol='d'  , name='day'),
+		]
 )
 
-Group(True, 'electric current', 'A',
-	Unit('mA', 'milliampere', 'milliamperes', ApplyRatio('A', ' ::std::milli')),
-	Unit( 'A',      'ampere',      'amperes', SIValue(0, 0, 0, 1)),
+BaseUnit(3,
+	quantities=['electric current'],
+	symbol='A',
+	name='ampere',
+	variants=['milli', SELF]
 )
 
-Group(True, 'temperature', 'K',
-	Unit('K', 'kelvin', 'kelvins', SIValue(0, 0, 0, 0, 1)),
+BaseUnit(4,
+	quantities=['temperature'],
+	symbol='K',
+	name='kelvin'
 )
 
-Group(True, 'luminous intensity', 'cd',
-	Unit('cd', 'candela', 'candelas', SIValue(0, 0, 0, 0, 0, 1)),
+BaseUnit(5,
+	quantities=['luminous intensity'],
+	symbol='cd',
+	name='candela'
 )
 
-Group(True, 'amount of substance', 'mol',
-	Unit('mol', 'mole', 'moles', SIValue(0, 0, 0, 0, 0, 0, 1)),
+BaseUnit(6,
+	quantities=['amount of substance'],
+	symbol='mol',
+	name='mole'
 )
 
-
-# Derived units #
-
-Group(False, 'area', 'm²',
-	Unit('cm²', 'square centimeter', 'square centimeters', Multiplication('cm', 'cm')),
-	Unit( 'm²', 'square meter'     , 'square meters'     , Multiplication( 'm',  'm')),
-	Unit('km²', 'square kilometer' , 'square kilometers' , Multiplication('km', 'km')),
+DerivedUnit(
+	quantities=['area'],
+	definition=Square('m'),
+	variants=[Square('cm'), SELF, Square('km')]
 )
 
-Group(False, 'volume', 'm³',
-	Unit('m³', 'cubic meter', 'cubic meters', Multiplication('m²', 'm')),
+DerivedUnit(
+	quantities=['volume'],
+	definition=Cube('m'),
 )
 
-Group(False, 'speed', 'm/s',
-	Unit('m/s', 'meter per second', 'meters per second', Division('m', 's'))
+DerivedUnit(
+	quantities=['speed', 'velocity'],
+	definition=Division('m', 's'),
+	variants=[SELF, Division('km', 'h')]
 )
 
-Group(False, 'acceleration', 'm/s²',
-	Unit('m/s²', 'meter per second squared', 'meters per second squared', Division('m/s', 's'))
+DerivedUnit(
+	quantities=['acceleration'],
+	definition=Division('m', Square('s'))
 )
 
-Group(False, ['force', 'weight'], 'N',
-	Unit('N', 'newton', 'newtons', Multiplication('kg', 'm/s²'))
+DerivedUnit(
+	quantities=['force', 'weight'],
+	symbol='N',
+	name='newton',
+	definition=Multiplication('kg', 'm/s²'),
 )
 
-Group(False, ['pressure', 'stress'], 'Pa',
-	Unit( 'Pa',      'pascal',      'pascals', Division('N', 'm²')),
-	Unit('hPa', 'hectopascal', 'hectopascals', ApplyRatio('Pa', ' ::std::hecto')),
-	Unit('kPa',  'kilopascal',  'kilopascals', ApplyRatio('Pa', ' ::std::kilo')),
-	Unit('MPa',  'megapascal',  'megapascals', ApplyRatio('Pa', ' ::std::mega')),
-	Unit('GPa',  'gigapascal',  'gigapascals', ApplyRatio('Pa', ' ::std::giga')),
+DerivedUnit(
+	quantities=['pressure', 'stress'],
+	symbol='Pa',
+	name='pascal',
+	definition=Division('N', 'm²'),
+	variants=[SELF, 'hecto', 'kilo', 'mega', 'giga']
 )
 
-Group(False, ['energy', 'work', 'heat'], 'J',
-	Unit('pJ',  'picojoule',  'picojoules', ApplyRatio('J', ' ::std::pico')),
-	Unit('nJ',  'nanojoule',  'nanojoules', ApplyRatio('J', ' ::std::nano')),
-	Unit('μJ', 'microjoule', 'microjoules', ApplyRatio('J', ' ::std::micro')),
-	Unit('mJ', 'millijoule', 'millijoules', ApplyRatio('J', ' ::std::milli')),
-	Unit( 'J',      'joule',      'joules', Multiplication('N', 'm')),
-	Unit('kJ',  'kilojoule',  'kilojoules', ApplyRatio('J', ' ::std::kilo')),
-	Unit('MJ',  'megajoule',  'megajoules', ApplyRatio('J', ' ::std::mega')),
-	Unit('GJ',  'gigajoule',  'gigajoules', ApplyRatio('J', ' ::std::giga')),
-	Unit('TJ',  'terajoule',  'terajoules', ApplyRatio('J', ' ::std::tera')),
+DerivedUnit(
+	quantities=['energy', 'work', 'heat'],
+	symbol='J',
+	name='joule',
+	definition=Multiplication('N', 'm'),
+	variants=['pico', 'nano', 'micro', 'milli', SELF, 'kilo', 'mega', 'giga', 'tera']
 )
 
-Group(False, 'power', 'W',
-	Unit('pW',  'picowatt',  'picowatts', ApplyRatio('W', ' ::std::pico')),
-	Unit('nW',  'nanowatt',  'nanowatts', ApplyRatio('W', ' ::std::nano')),
-	Unit('μW', 'microwatt', 'microwatts', ApplyRatio('W', ' ::std::micro')),
-	Unit('mW', 'milliwatt', 'milliwatts', ApplyRatio('W', ' ::std::milli')),
-	Unit( 'W',      'watt',      'watts', Division('J', 's')),
-	Unit('kW',  'kilowatt',  'kilowatts', ApplyRatio('W', ' ::std::kilo')),
-	Unit('MW',  'megawatt',  'megawatts', ApplyRatio('W', ' ::std::mega')),
-	Unit('GW',  'gigawatt',  'gigawatts', ApplyRatio('W', ' ::std::giga')),
-	Unit('TW',  'terawatt',  'terawatts', ApplyRatio('W', ' ::std::tera')),
+DerivedUnit(
+	quantities=['power'],
+	symbol='W',
+	name='watt',
+	definition=Division('J', 's'),
+	variants=['pico', 'nano', 'micro', 'milli', SELF, 'kilo', 'mega', 'giga', 'tera']
 )
 
-Group(False, 'electric charge', 'C',
-	Unit('pC',  'picocoulomb',  'picocoulombs', ApplyRatio('C', ' ::std::pico')),
-	Unit('nC',  'nanocoulomb',  'nanocoulombs', ApplyRatio('C', ' ::std::nano')),
-	Unit('μC', 'microcoulomb', 'microcoulombs', ApplyRatio('C', ' ::std::micro')),
-	Unit('mC', 'millicoulomb', 'millicoulombs', ApplyRatio('C', ' ::std::milli')),
-	Unit( 'C',      'coulomb',      'coulombs', Multiplication('A', 's')),
+DerivedUnit(
+	quantities=['electric charge'],
+	symbol='C',
+	name='coulomb',
+	definition=Multiplication('A', 's'),
+	variants=['pico', 'nano', 'micro', 'milli', SELF],
 )
 
-Group(False, ['voltage', 'electrical potential difference'], 'V',
-	Unit('mV', 'millivolt', 'millivolts', ApplyRatio('V', ' ::std::milli')),
-	Unit( 'V',      'volt',      'volts', Division('W', 'A')),
-	Unit('kV',  'kilovolt',  'kilovolts', ApplyRatio('V', ' ::std::kilo')),
-	Unit('MV',  'megavolt',  'megavolts', ApplyRatio('V', ' ::std::mega')),
+DerivedUnit(
+	quantities=['voltage', 'electrical potential difference'],
+	symbol='V',
+	name='volt',
+	definition=Division('W', 'A'),
+	variants=['milli', SELF, 'kilo', 'mega']
 )
 
-Group(False, 'electric capacitance', 'F',
-	Unit('pF',  'picofarad',  'picofarads', ApplyRatio('F', ' ::std::pico')),
-	Unit('nF',  'nanofarad',  'nanofarads', ApplyRatio('F', ' ::std::nano')),
-	Unit('μF', 'microfarad', 'microfarads', ApplyRatio('F', ' ::std::micro')),
-	Unit( 'F',      'farad',      'farads', Division('C', 'V')),
+DerivedUnit(
+	quantities=['electric capacitance'],
+	symbol='F',
+	name='farad',
+	definition=Division('C', 'V'),
+	variants=['pico', 'nano', 'micro', SELF]
 )
 
-Group(False, 'frequency', 'Hz',
-	Unit('Hz', 'hertz', 'hertz', Division(None, 's')),
+DerivedUnit(
+	quantities=['frequency'],
+	symbol='Hz',
+	name='hertz', name_plural='hertz',
+	definition=Division(1, 's')
 )
 
 
