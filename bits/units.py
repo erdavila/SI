@@ -157,7 +157,7 @@ class UnitVariant(object):
 		return self._name_plural
 	
 	def clean_symbol(self):
-		return self._symbol.replace('μ', 'u').replace('/', '_').replace('²', '2').replace('³', '3')
+		return self._symbol.replace('μ', 'u').replace('·', '').replace('/', '_').replace('²', '2').replace('³', '3')
 	
 	def type_name(self):
 		name_parts = self.unit.quantities[0].split(' ')
@@ -348,6 +348,9 @@ class BinaryOperation(Definition):
 class Multiplication(BinaryOperation):
 	def __init__(self, from_symbol1, from_symbol2):
 		super(Multiplication, self).__init__(from_symbol1, from_symbol2)
+	
+	def symbol(self):
+		return self.operand1().symbol() + '·' + self.operand2().symbol()
 	
 	def name(self):
 		return self.operand1().name() + ' ' + self.operand2().name()
@@ -542,6 +545,69 @@ DerivedUnit(
 	name='hertz', name_plural='hertz',
 	definition=Division(1, 's')
 )
+
+DerivedUnit(
+	quantities=['volumetric flow'],
+	definition=Division(Cube('m'), 's')
+)
+
+#DerivedUnit(
+#	quantities=['jerk', 'jolt'],
+#	definition=Division('m', Cube('s'))
+#)
+#
+#DerivedUnit(
+#	quantities=['snap', 'jounce'],
+#	definition=Division('m', Quartic('s'))
+#)
+
+DerivedUnit(
+	quantities=['momentum', 'impulse'],
+	definition=Multiplication('N', 's')
+)
+
+DerivedUnit(
+	quantities=['torque', 'moment of force'],
+	definition=Multiplication('N', 'm')
+)
+
+DerivedUnit(
+	quantities=['angular momentum'],
+	definition=Multiplication('N·m', 's')
+)
+
+DerivedUnit(
+	quantities=['yank'],
+	definition=Division('N', 's')
+)
+
+DerivedUnit(
+	quantities=['area density'],
+	definition=Division('kg', 'm²')
+)
+
+DerivedUnit(
+	quantities=['density', 'mass density'],
+	definition=Division('kg', 'm³')
+)
+
+DerivedUnit(
+	quantities=['specific volume'],
+	definition=Division('m³', 'kg')
+)
+
+DerivedUnit(
+	quantities=['amount of substance concentration'],
+	definition=Division('mol', 'm³')
+)
+
+DerivedUnit(
+	quantities=['molar volume'],
+	definition=Division('m³', 'mol')
+)
+
+
+
 
 
 if __name__ == '__main__':
