@@ -165,6 +165,8 @@ class UnitVariant(object):
 				'/' : '_',
 				'²' : '2',
 				'³' : '3',
+				'(' : '',
+				')' : '',
 		}
 		
 		symbol = self._symbol
@@ -409,7 +411,11 @@ class Division(BinaryOperation):
 		super(Division, self).__init__(operand1, operand2)
 	
 	def symbol(self):
-		return self.operand1().symbol() + '/' + self.operand2().symbol()
+		symbol2 = self.operand2().symbol()
+		if '·' in symbol2:
+			symbol2 = '(' + symbol2 + ')'
+		
+		return self.operand1().symbol() + '/' + symbol2
 	
 	def name(self):
 		return self.operand1().name() + ' per ' + self.operand2().name()
@@ -673,6 +679,126 @@ DerivedUnit(
 DerivedUnit(
 	quantities=['molar volume'],
 	definition=Division('m³', 'mol')
+)
+
+DerivedUnit(
+	quantities=['action'],
+	definition=Multiplication('J', 's')
+)
+
+DerivedUnit(
+	quantities=['heat capacity', 'entropy'],
+	definition=Division('J', 'K')
+)
+
+DerivedUnit(
+	quantities=['molar heat capacity', 'molar entropy'],
+	definition=Division('J', Multiplication('K', 'mol'))
+)
+
+DerivedUnit(
+	quantities=['specific heat capacity', 'specific entropy'],
+	definition=Division('J', Multiplication('K', 'kg'))
+)
+
+DerivedUnit(
+	quantities=['molar energy'],
+	definition=Division('J', 'mol')
+)
+
+DerivedUnit(
+	quantities=['specific energy'],
+	definition=Division('J', 'kg')
+)
+
+DerivedUnit(
+	quantities=['energy density'],
+	definition=Division('J', 'm³')
+)
+
+DerivedUnit(
+	quantities=['surface tension'],
+	definition=Division('N', 'm')
+)
+
+DerivedUnit(
+	quantities=['heat flux density', 'irradiance'],
+	definition=Division('W', 'm²')
+)
+
+DerivedUnit(
+	quantities=['thermal conductivity'],
+	definition=Division('W', Multiplication('m', 'K'))
+)
+
+DerivedUnit(
+	quantities=['kinematic viscosity', 'diffusion coefficient'],
+	definition=Division('m²', 's')
+)
+
+DerivedUnit(
+	quantities=['dynamic viscosity'],
+	definition=Multiplication('Pa', 's')
+)
+
+DerivedUnit(
+	quantities=['electric displacement field', 'polarization vector'],
+	definition=Division('C', 'm²')
+)
+
+DerivedUnit(
+	quantities=['electric charge density'],
+	definition=Division('C', 'm³')
+)
+
+DerivedUnit(
+	quantities=['electric current density'],
+	definition=Division('A', 'm²')
+)
+
+DerivedUnit(
+	quantities=['conductivity'],
+	definition=Division('S', 'm')
+)
+
+DerivedUnit(
+	quantities=['molar conductivity'],
+	definition=Division(Multiplication('S', 'm²'), 'mol')
+)
+
+DerivedUnit(
+	quantities=['permittivity'],
+	definition=Division('F', 'm')
+)
+
+DerivedUnit(
+	quantities=['permeability'],
+	definition=Division('H', 'm')
+)
+
+DerivedUnit(
+	quantities=['electric field strength'],
+	definition=Division('V', 'm')
+)
+
+DerivedUnit(
+	quantities=['magnetic field strength'],
+	definition=Division('A', 'm')
+)
+
+DerivedUnit(
+	quantities=['luminance'],
+	definition=Division('cd', 'm²')
+)
+
+DerivedUnit(
+	quantities=['exposure'],
+	definition=Division('C', 'kg')
+)
+
+DerivedUnit(
+	quantities=['resistivity'],
+	definition=Multiplication('Ω', 'm')
 )
 
 

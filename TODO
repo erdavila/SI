@@ -1,2 +1,4 @@
-- Define missing SI base and derived units.
-  
+- Review names and concepts and update code and docs.
+	- power -> dimension
+	- variant -> ?
+	- ...
