@@ -3,6 +3,7 @@
 
 from __future__ import print_function
 import sys
+from fractions import Fraction
 
 
 def generate_macros():
@@ -157,7 +158,19 @@ class UnitVariant(object):
 		return self._name_plural
 	
 	def clean_symbol(self):
-		return self._symbol.replace('μ', 'u').replace('·', '').replace('/', '_').replace('²', '2').replace('³', '3')
+		REPLACEMENT = {
+				'μ' : 'u',
+				'Ω' : 'ohm',
+				'·' : '',
+				'/' : '_',
+				'²' : '2',
+				'³' : '3',
+		}
+		
+		symbol = self._symbol
+		for key, val in REPLACEMENT.iteritems():
+			symbol = symbol.replace(key, val)
+		return symbol
 	
 	def type_name(self):
 		name_parts = self.unit.quantities[0].split(' ')
@@ -181,7 +194,7 @@ class UnitVariant(object):
 class Unit(object):
 	
 	def __init__(self, is_base_unit, quantities, symbol):
-		self._is_base_unit = True
+		self._is_base_unit = is_base_unit
 		self.quantities = quantities
 		self.symbol = symbol
 		
@@ -211,12 +224,16 @@ class Unit(object):
 				elif isinstance(variant_spec, Ratio):
 					ratio = variant_spec
 					definition_from = main_variant.definition_from()
+					if isinstance(ratio.multiplier, Fraction):
+						ratio_str = '%d, %d' % (ratio.multiplier.numerator, ratio.multiplier.denominator)
+					else:
+						ratio_str = int(ratio.multiplier)
 					variant = UnitVariant(
 									unit=self,
 									symbol=ratio.symbol,
 									name=ratio.name,
 									name_plural=ratio.name + 's',
-									definition_str='%s::apply_ratio< ::std::ratio<%d>>::type' % (definition_from, ratio.multiplier),
+									definition_str='%s::apply_ratio< ::std::ratio<%s>>::type' % (definition_from, ratio_str),
 								)
 				elif isinstance(variant_spec, Definition):
 					definition = variant_spec
@@ -540,6 +557,58 @@ DerivedUnit(
 )
 
 DerivedUnit(
+	quantities=['electric resistance', 'impedance', 'reactance'],
+	symbol='Ω',
+	name='ohm',
+	definition=Division('V', 'A'),
+)
+
+DerivedUnit(
+	quantities=['electrical conductance'],
+	symbol='S',
+	name='siemens', name_plural='siemens',
+	definition=Division('A', 'V'),
+)
+
+DerivedUnit(
+	quantities=['magnetic flux'],
+	symbol='Wb',
+	name='weber',
+	definition=Division('J', 'A'),
+	variants=[Ratio(Fraction(1, 100000000), 'Mx', 'maxwell'), SELF]
+)
+
+DerivedUnit(
+	quantities=['magnetic field strength', 'magnetic flux density'],
+	symbol='T',
+	name='tesla',
+	definition=Division('Wb', 'm²'),
+	variants=['nano', 'micro', 'milli', SELF]
+)
+
+DerivedUnit(
+	quantities=['inductance'],
+	symbol='H',
+	name='henry', name_plural='henries',
+	definition=Division('Wb', 'A'),
+)
+
+DerivedUnit(
+	quantities=['equivalent dose'],
+	symbol='Sv',
+	name='sievert',
+	definition=Division('J', 'kg'),
+	variants=['micro', 'milli', SELF]
+)
+
+DerivedUnit(
+	quantities=['catalytic activity'],
+	symbol='kat',
+	name='katal',
+	definition=Division('mol', 's'),
+)
+
+DerivedUnit(
 	quantities=['frequency'],
 	symbol='Hz',
 	name='hertz', name_plural='hertz',
@@ -605,8 +674,6 @@ DerivedUnit(
 	quantities=['molar volume'],
 	definition=Division('m³', 'mol')
 )
-
-
 
 
 
