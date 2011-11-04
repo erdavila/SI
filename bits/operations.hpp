@@ -28,25 +28,25 @@ public:
 };
 
 
-template <typename ValueType1, typename Ratio1, int... BaseUnitPowers1,
-          typename ValueType2, typename Ratio2, int... BaseUnitPowers2>
-struct addition<SIValue<ValueType1, Ratio1, BaseUnitPowers1...>,
-                SIValue<ValueType2, Ratio2, BaseUnitPowers2...>>
+template <typename ValueType1, typename Ratio1, int... Dimensions1,
+          typename ValueType2, typename Ratio2, int... Dimensions2>
+struct addition<SIValue<ValueType1, Ratio1, Dimensions1...>,
+                SIValue<ValueType2, Ratio2, Dimensions2...>>
 {
 private:
-	static_assert(std::is_same<int_list<BaseUnitPowers1...>,
-	                           int_list<BaseUnitPowers2...>>::value,
-	              "The powers of base units must be the same on the addition");
+	static_assert(std::is_same<int_list<Dimensions1...>,
+	                           int_list<Dimensions2...>>::value,
+	              "The units must be the same on the addition");
 
 	typedef typename addition<ValueType1, ValueType2>::type _NewValueType;
 	static const unsigned int _new_num = 1;
 	static const unsigned int _new_den = std::ratio_add<Ratio1, Ratio2>::type::den;
 	typedef std::ratio<_new_num, _new_den> _NewRatio;
 
-	typedef int_list<BaseUnitPowers1...> _NewBaseUnitPowersList;
+	typedef int_list<Dimensions1...> _NewDimensionsList;
 
 public:
-	typedef typename make_value<_NewValueType, _NewRatio, _NewBaseUnitPowersList>::type type;
+	typedef typename make_value<_NewValueType, _NewRatio, _NewDimensionsList>::type type;
 };
 
 
@@ -78,21 +78,21 @@ public:
 
 
 
-template <typename ValueType1, typename Ratio1, int... BaseUnitPowers1,
-          typename ValueType2, typename Ratio2, int... BaseUnitPowers2>
-struct multiplication<SIValue<ValueType1, Ratio1, BaseUnitPowers1...>,
-                      SIValue<ValueType2, Ratio2, BaseUnitPowers2...>>
+template <typename ValueType1, typename Ratio1, int... Dimensions1,
+          typename ValueType2, typename Ratio2, int... Dimensions2>
+struct multiplication<SIValue<ValueType1, Ratio1, Dimensions1...>,
+                      SIValue<ValueType2, Ratio2, Dimensions2...>>
 {
 private:
 	typedef typename multiplication<ValueType1, ValueType2>::type _NewValueType;
 	typedef typename std::ratio_multiply<Ratio1, Ratio2>::type _NewRatio;
 
-	typedef int_list<BaseUnitPowers1...> _BaseUnitPowersList1;
-	typedef int_list<BaseUnitPowers2...> _BaseUnitPowersList2;
-	typedef typename int_list_add<_BaseUnitPowersList1, _BaseUnitPowersList2>::type _NewBaseUnitPowersList;
+	typedef int_list<Dimensions1...> _DimensionsList1;
+	typedef int_list<Dimensions2...> _DimensionsList2;
+	typedef typename int_list_add<_DimensionsList1, _DimensionsList2>::type _NewDimensionsList;
 
 public:
-	typedef typename make_value<_NewValueType, _NewRatio, _NewBaseUnitPowersList>::type type;
+	typedef typename make_value<_NewValueType, _NewRatio, _NewDimensionsList>::type type;
 };
 
 
@@ -113,21 +113,21 @@ struct division {
 };
 
 
-template <typename ValueType1, typename Ratio1, int... BaseUnitPowers1,
-          typename ValueType2, typename Ratio2, int... BaseUnitPowers2>
-struct division<SIValue<ValueType1, Ratio1, BaseUnitPowers1...>,
-                SIValue<ValueType2, Ratio2, BaseUnitPowers2...>>
+template <typename ValueType1, typename Ratio1, int... Dimensions1,
+          typename ValueType2, typename Ratio2, int... Dimensions2>
+struct division<SIValue<ValueType1, Ratio1, Dimensions1...>,
+                SIValue<ValueType2, Ratio2, Dimensions2...>>
 {
 private:
 	typedef typename division<ValueType1, ValueType2>::type _NewValueType;
 	typedef typename std::ratio_divide<Ratio1, Ratio2>::type _NewRatio;
 
-	typedef int_list<BaseUnitPowers1...> _BaseUnitPowersList1;
-	typedef int_list<BaseUnitPowers2...> _BaseUnitPowersList2;
-	typedef typename int_list_subtract<_BaseUnitPowersList1, _BaseUnitPowersList2>::type _NewBaseUnitPowersList;
+	typedef int_list<Dimensions1...> _DimensionsList1;
+	typedef int_list<Dimensions2...> _DimensionsList2;
+	typedef typename int_list_subtract<_DimensionsList1, _DimensionsList2>::type _NewDimensionsList;
 
 public:
-	typedef typename make_value<_NewValueType, _NewRatio, _NewBaseUnitPowersList>::type type;
+	typedef typename make_value<_NewValueType, _NewRatio, _NewDimensionsList>::type type;
 };
 
 
@@ -140,11 +140,11 @@ private:
 
 	typedef ::std::ratio<1> _NewRatio;
 
-	typedef typename SIValue::BaseUnitPowersList _BaseUnitPowersList;
-	typedef typename int_list_half<_BaseUnitPowersList>::type _NewBaseUnitPowersList;
+	typedef typename SIValue::DimensionsList _DimensionsList;
+	typedef typename int_list_half<_DimensionsList>::type _NewDimensionsList;
 
 public:
-	typedef typename make_value<_NewValueType, _NewRatio, _NewBaseUnitPowersList>::type type;
+	typedef typename make_value<_NewValueType, _NewRatio, _NewDimensionsList>::type type;
 };
 
 

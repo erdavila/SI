@@ -25,9 +25,9 @@ def generate_macros():
 			print(unit.header_doc())
 			print('//@{')
 			
-			for variant in unit.variants:
-				print('/// %s in %s' % (unit.quantities[0].capitalize(), variant.name_plural()))
-				print('#define %s(ValueType)\t%s' % (variant.macro_name(), variant.macro_definition()))
+			for multiple in unit.multiples:
+				print('/// %s in %s' % (unit.quantities[0].capitalize(), multiple.name_plural()))
+				print('#define %s(ValueType)\t%s' % (multiple.macro_name(), multiple.macro_definition()))
 	
 			print('//@}')
 		
@@ -60,9 +60,9 @@ def generate_units_header():
 			print(unit.header_doc())
 			print('//@{')
 			
-			for variant in unit.variants:
-				print('/// 1%s (1 %s)' % (variant.symbol(), variant.name()))
-				print('extern const %s\t%s;' % (variant.const_declaration(), variant.clean_symbol()))
+			for multiple in unit.multiples:
+				print('/// 1 %s (1 %s)' % (multiple.symbol(), multiple.name()))
+				print('extern const %s\t%s;' % (multiple.const_declaration(), multiple.clean_symbol()))
 						
 			print('//@}')
 		
@@ -92,8 +92,8 @@ def generate_units():
 		for unit in UNITS:
 			print('')
 			
-			for variant in unit.variants:
-				print('const %s\t%s(1);' % (variant.const_declaration(), variant.clean_symbol()))
+			for multiple in unit.multiples:
+				print('const %s\t%s(1);' % (multiple.const_declaration(), multiple.clean_symbol()))
 		
 		print('')
 		print('')
@@ -114,7 +114,7 @@ def main():
 UNITS = []
 UNITS_BY_SYMBOL = {}
 
-VARIANTS = {}
+ALL_MULTIPLES = {}
 
 
 class Prefix(object):
@@ -139,7 +139,7 @@ SELF = object()
 
 
 
-class UnitVariant(object):
+class UnitMultiple(object):
 	
 	def __init__(self, unit, symbol, name, name_plural, definition_str):
 		self.unit = unit
@@ -203,43 +203,43 @@ class Unit(object):
 		UNITS.append(self)
 		UNITS_BY_SYMBOL[symbol] = self
 	
-	def process_variants(self, variants_specs, main_variant):
-		if variants_specs is None:
-			self.variants = [main_variant]
-			VARIANTS[main_variant.symbol()] = main_variant
+	def process_multiples(self, multiples_specs, main_multiple):
+		if multiples_specs is None:
+			self.multiples = [main_multiple]
+			ALL_MULTIPLES[main_multiple.symbol()] = main_multiple
 		else:
-			self.variants = []
-			for variant_spec in variants_specs:
-				if variant_spec is SELF:
-					variant = main_variant
-				elif isinstance(variant_spec, str):
-					prefix = variant_spec
+			self.multiples = []
+			for multiple_spec in multiples_specs:
+				if multiple_spec is SELF:
+					multiple = main_multiple
+				elif isinstance(multiple_spec, str):
+					prefix = multiple_spec
 					p = PREFIXES[prefix]
-					definition_from = main_variant.definition_from()
-					variant = UnitVariant(
+					definition_from = main_multiple.definition_from()
+					multiple = UnitMultiple(
 									unit=self,
 									symbol=p.symbol + self.symbol,
 									name=prefix + self.name(),
 									name_plural=prefix + self.name_plural(),
 									definition_str='%s::apply_ratio< ::std::%s>::type' % (definition_from, prefix),
 								)
-				elif isinstance(variant_spec, Ratio):
-					ratio = variant_spec
-					definition_from = main_variant.definition_from()
+				elif isinstance(multiple_spec, Ratio):
+					ratio = multiple_spec
+					definition_from = main_multiple.definition_from()
 					if isinstance(ratio.multiplier, Fraction):
 						ratio_str = '%d, %d' % (ratio.multiplier.numerator, ratio.multiplier.denominator)
 					else:
 						ratio_str = int(ratio.multiplier)
-					variant = UnitVariant(
+					multiple = UnitMultiple(
 									unit=self,
 									symbol=ratio.symbol,
 									name=ratio.name,
 									name_plural=ratio.name + 's',
 									definition_str='%s::apply_ratio< ::std::ratio<%s>>::type' % (definition_from, ratio_str),
 								)
-				elif isinstance(variant_spec, Definition):
-					definition = variant_spec
-					variant = UnitVariant(
+				elif isinstance(multiple_spec, Definition):
+					definition = multiple_spec
+					multiple = UnitMultiple(
 									unit=self,
 									symbol=definition.symbol(),
 									name=definition.name(),
@@ -247,10 +247,10 @@ class Unit(object):
 									definition_str=definition.str()
 								)
 				else:
-					raise NotImplementedError(variant_spec)
+					raise NotImplementedError(multiple_spec)
 	
-				self.variants.append(variant)
-				VARIANTS[variant.symbol()] = variant
+				self.multiples.append(multiple)
+				ALL_MULTIPLES[multiple.symbol()] = multiple
 	
 	
 	def header_doc(self):
@@ -269,25 +269,25 @@ class Unit(object):
 
 class BaseUnit(Unit):
 	
-	def __init__(self, index, quantities, symbol, name, variants=None):
+	def __init__(self, index, quantities, symbol, name, multiples=None):
 		super(BaseUnit, self).__init__(True, quantities, symbol)
 		
 		self._name = name
 		self._name_plural = name + 's'
 		
-		base_unit_powers = [0] * 7
-		base_unit_powers[index] = 1
+		dimensions = [0] * 7
+		dimensions[index] = 1
 		
-		main_variant = UnitVariant(
+		main_multiple = UnitMultiple(
 							unit=self,
 							symbol=symbol,
 							name=name,
 							name_plural=name + 's',
-							definition_str='::si::SIValue<ValueType, ::std::ratio<1>, %s>' % ', '.join(str(power) for power in base_unit_powers)
+							definition_str='::si::SIValue<ValueType, ::std::ratio<1>, %s>' % ', '.join(str(power) for power in dimensions)
 						)
 		
-		variants_specs = variants
-		self.process_variants(variants_specs, main_variant)
+		multiples_specs = multiples
+		self.process_multiples(multiples_specs, main_multiple)
 	
 	
 	def name(self):
@@ -299,7 +299,7 @@ class BaseUnit(Unit):
 
 
 class DerivedUnit(Unit):
-	def __init__(self, quantities, definition, symbol=None, name=None, name_plural=None, variants=None):
+	def __init__(self, quantities, definition, symbol=None, name=None, name_plural=None, multiples=None):
 		if symbol is None: symbol = definition.symbol()
 		super(DerivedUnit, self).__init__(False, quantities, symbol)
 		
@@ -313,7 +313,7 @@ class DerivedUnit(Unit):
 		self._name = name
 		self._name_plural = name_plural
 		
-		main_variant = UnitVariant(
+		main_multiple = UnitMultiple(
 							unit=self,
 							symbol=symbol,
 							name=name,
@@ -321,8 +321,8 @@ class DerivedUnit(Unit):
 							definition_str=definition.str()
 						)
 		
-		variants_specs = variants
-		self.process_variants(variants_specs, main_variant)
+		multiples_specs = multiples
+		self.process_multiples(multiples_specs, main_multiple)
 	
 	def name(self):
 		return self._name
@@ -346,8 +346,8 @@ class Definition(object):
 	
 	def definition_from(self):
 		symbol = self.symbol()
-		if symbol in VARIANTS:
-			return VARIANTS[symbol].definition_from()
+		if symbol in ALL_MULTIPLES:
+			return ALL_MULTIPLES[symbol].definition_from()
 		else:
 			return self.str()
 
@@ -358,10 +358,10 @@ class BinaryOperation(Definition):
 		self._operand2 = operand2
 	
 	def operand1(self):
-		return VARIANTS[self._operand1] if isinstance(self._operand1, str) else self._operand1
+		return ALL_MULTIPLES[self._operand1] if isinstance(self._operand1, str) else self._operand1
 	
 	def operand2(self):
-		return VARIANTS[self._operand2] if isinstance(self._operand2, str) else self._operand2
+		return ALL_MULTIPLES[self._operand2] if isinstance(self._operand2, str) else self._operand2
 
 
 class Multiplication(BinaryOperation):
@@ -389,8 +389,8 @@ class Square(Multiplication):
 		return self.from_symbol + '²'
 	
 	def name(self):
-		variant = VARIANTS[self.from_symbol]
-		return 'square ' + variant.name()
+		multiple = ALL_MULTIPLES[self.from_symbol]
+		return 'square ' + multiple.name()
 	
 
 class Cube(Multiplication):
@@ -402,8 +402,8 @@ class Cube(Multiplication):
 		return self.from_symbol + '³'
 	
 	def name(self):
-		variant = VARIANTS[self.from_symbol]
-		return 'cubic ' + variant.name()
+		multiples = ALL_MULTIPLES[self.from_symbol]
+		return 'cubic ' + multiples.name()
 	
 
 class Division(BinaryOperation):
@@ -439,21 +439,21 @@ BaseUnit(0,
 	quantities=['length', 'distance'],
 	symbol='m',
 	name='meter',
-	variants=['nano', 'micro', 'milli', 'centi', SELF, 'kilo']
+	multiples=['nano', 'micro', 'milli', 'centi', SELF, 'kilo']
 )
 
 BaseUnit(1,
 	quantities=['mass'],
 	symbol='g',
 	name='gram',
-	variants=['pico', 'nano', 'micro', 'milli', 'centi', SELF, 'kilo']
+	multiples=['pico', 'nano', 'micro', 'milli', 'centi', SELF, 'kilo']
 )
 
 BaseUnit(2,
 	quantities=['time'],
 	symbol='s',
 	name='second',
-	variants=['nano', 'micro', 'milli', SELF,
+	multiples=['nano', 'micro', 'milli', SELF,
 			Ratio(      60, symbol='min', name='minute'),
 			Ratio(   60*60, symbol='h'  , name='hour'),
 			Ratio(24*60*60, symbol='d'  , name='day'),
@@ -464,7 +464,7 @@ BaseUnit(3,
 	quantities=['electric current'],
 	symbol='A',
 	name='ampere',
-	variants=['milli', SELF]
+	multiples=['milli', SELF]
 )
 
 BaseUnit(4,
@@ -488,7 +488,7 @@ BaseUnit(6,
 DerivedUnit(
 	quantities=['area'],
 	definition=Square('m'),
-	variants=[Square('cm'), SELF, Square('km')]
+	multiples=[Square('cm'), SELF, Square('km')]
 )
 
 DerivedUnit(
@@ -499,7 +499,7 @@ DerivedUnit(
 DerivedUnit(
 	quantities=['speed', 'velocity'],
 	definition=Division('m', 's'),
-	variants=[SELF, Division('km', 'h')]
+	multiples=[SELF, Division('km', 'h')]
 )
 
 DerivedUnit(
@@ -519,7 +519,7 @@ DerivedUnit(
 	symbol='Pa',
 	name='pascal',
 	definition=Division('N', 'm²'),
-	variants=[SELF, 'hecto', 'kilo', 'mega', 'giga']
+	multiples=[SELF, 'hecto', 'kilo', 'mega', 'giga']
 )
 
 DerivedUnit(
@@ -527,7 +527,7 @@ DerivedUnit(
 	symbol='J',
 	name='joule',
 	definition=Multiplication('N', 'm'),
-	variants=['pico', 'nano', 'micro', 'milli', SELF, 'kilo', 'mega', 'giga', 'tera']
+	multiples=['pico', 'nano', 'micro', 'milli', SELF, 'kilo', 'mega', 'giga', 'tera']
 )
 
 DerivedUnit(
@@ -535,7 +535,7 @@ DerivedUnit(
 	symbol='W',
 	name='watt',
 	definition=Division('J', 's'),
-	variants=['pico', 'nano', 'micro', 'milli', SELF, 'kilo', 'mega', 'giga', 'tera']
+	multiples=['pico', 'nano', 'micro', 'milli', SELF, 'kilo', 'mega', 'giga', 'tera']
 )
 
 DerivedUnit(
@@ -543,7 +543,7 @@ DerivedUnit(
 	symbol='C',
 	name='coulomb',
 	definition=Multiplication('A', 's'),
-	variants=['pico', 'nano', 'micro', 'milli', SELF],
+	multiples=['pico', 'nano', 'micro', 'milli', SELF],
 )
 
 DerivedUnit(
@@ -551,7 +551,7 @@ DerivedUnit(
 	symbol='V',
 	name='volt',
 	definition=Division('W', 'A'),
-	variants=['milli', SELF, 'kilo', 'mega']
+	multiples=['milli', SELF, 'kilo', 'mega']
 )
 
 DerivedUnit(
@@ -559,7 +559,7 @@ DerivedUnit(
 	symbol='F',
 	name='farad',
 	definition=Division('C', 'V'),
-	variants=['pico', 'nano', 'micro', SELF]
+	multiples=['pico', 'nano', 'micro', SELF]
 )
 
 DerivedUnit(
@@ -581,7 +581,7 @@ DerivedUnit(
 	symbol='Wb',
 	name='weber',
 	definition=Division('J', 'A'),
-	variants=[Ratio(Fraction(1, 100000000), 'Mx', 'maxwell'), SELF]
+	multiples=[Ratio(Fraction(1, 100000000), 'Mx', 'maxwell'), SELF]
 )
 
 DerivedUnit(
@@ -589,7 +589,7 @@ DerivedUnit(
 	symbol='T',
 	name='tesla',
 	definition=Division('Wb', 'm²'),
-	variants=['nano', 'micro', 'milli', SELF]
+	multiples=['nano', 'micro', 'milli', SELF]
 )
 
 DerivedUnit(
@@ -604,7 +604,7 @@ DerivedUnit(
 	symbol='Sv',
 	name='sievert',
 	definition=Division('J', 'kg'),
-	variants=['micro', 'milli', SELF]
+	multiples=['micro', 'milli', SELF]
 )
 
 DerivedUnit(
@@ -625,16 +625,6 @@ DerivedUnit(
 	quantities=['volumetric flow'],
 	definition=Division(Cube('m'), 's')
 )
-
-#DerivedUnit(
-#	quantities=['jerk', 'jolt'],
-#	definition=Division('m', Cube('s'))
-#)
-#
-#DerivedUnit(
-#	quantities=['snap', 'jounce'],
-#	definition=Division('m', Quartic('s'))
-#)
 
 DerivedUnit(
 	quantities=['momentum', 'impulse'],

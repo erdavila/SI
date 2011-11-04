@@ -26,16 +26,16 @@ namespace si {
  *         well (@c std::centi, @c std::milli, @c std::micro, @c std::kilo,
  *         @c std::mega, etc. See documentation for the standard
  *         <tt>\<ratio\></tt> header file).
- * @tparam _BaseUnitPowers... The powers of each SI base unit.
+ * @tparam _Dimensions... The powers of each SI base unit.
  *
  * @see http://en.wikipedia.org/wiki/International_System_of_Units
  */
-template <typename _ValueType, typename _Ratio, int... _BaseUnitPowers>
+template <typename _ValueType, typename _Ratio, int... _Dimensions>
 class SIValue {
 public:
 	typedef _ValueType ValueType;
 	typedef _Ratio Ratio;
-	typedef int_list<_BaseUnitPowers...> BaseUnitPowersList;
+	typedef int_list<_Dimensions...> DimensionsList;
 
 
 	// Defines a new SI type from this type by specifying a different ratio.
@@ -56,7 +56,7 @@ public:
 	template <typename NewRatio>
 	struct with_ratio {
 		/// The new defined type.
-		typedef SIValue<ValueType, NewRatio, _BaseUnitPowers...> type;
+		typedef SIValue<ValueType, NewRatio, _Dimensions...> type;
 	};
 
 	/// Defines a new SI type from this type by applying another ratio.
@@ -95,7 +95,7 @@ public:
 	 * A value can only be copied from another value of the same unit.
 	 */
 	template <typename ValueTypeFrom, typename RatioFrom>
-	SIValue(const SIValue<ValueTypeFrom, RatioFrom, _BaseUnitPowers...>& v)
+	SIValue(const SIValue<ValueTypeFrom, RatioFrom, _Dimensions...>& v)
 		: value(convertFrom<ValueTypeFrom, RatioFrom>(v.value))
 	{}
 
@@ -150,7 +150,7 @@ public:
 	 * A value can only be added to another value of the same unit.
 	 */
 	template <typename ValueType2, typename Ratio2>
-	SIValue& operator+=(const SIValue<ValueType2, Ratio2, _BaseUnitPowers...>& v) {
+	SIValue& operator+=(const SIValue<ValueType2, Ratio2, _Dimensions...>& v) {
 		value += convertFrom<ValueType2, Ratio2>(v.value);
 		return *this;
 	}
@@ -167,7 +167,7 @@ public:
 	 * A value can only be subtracted from another value of the same unit.
 	 */
 	template <typename ValueType2, typename Ratio2>
-	SIValue& operator-=(const SIValue<ValueType2, Ratio2, _BaseUnitPowers...>& v) {
+	SIValue& operator-=(const SIValue<ValueType2, Ratio2, _Dimensions...>& v) {
 		value -= convertFrom<ValueType2, Ratio2>(v.value);
 		return *this;
 	}
@@ -195,18 +195,18 @@ private:
 
 
 // Defines an SI Value type from a unit_list type.
-template <typename ValueType, typename Ratio, int... BaseUnitPowers>
-struct make_value<ValueType, Ratio, int_list<BaseUnitPowers...>> {
-	typedef SIValue<ValueType, Ratio, BaseUnitPowers...> type;
+template <typename ValueType, typename Ratio, int... Dimensions>
+struct make_value<ValueType, Ratio, int_list<Dimensions...>> {
+	typedef SIValue<ValueType, Ratio, Dimensions...> type;
 };
 
 
 
 // This specialization compares values with same ratios, so no conversion is needed.
-template <typename ValueType1, typename ValueType2, typename Ratio, int... BaseUnitPowers>
+template <typename ValueType1, typename ValueType2, typename Ratio, int... Dimensions>
 bool
-operator==(const SIValue<ValueType1, Ratio, BaseUnitPowers...>& v1,
-           const SIValue<ValueType2, Ratio, BaseUnitPowers...>& v2)
+operator==(const SIValue<ValueType1, Ratio, Dimensions...>& v1,
+           const SIValue<ValueType2, Ratio, Dimensions...>& v2)
 {
 	return v1.value == v2.value;
 }
@@ -222,10 +222,10 @@ operator==(const SIValue<ValueType1, Ratio, BaseUnitPowers...>& v1,
  */
 template <typename ValueType1, typename Ratio1,
           typename ValueType2, typename Ratio2,
-          int... BaseUnitPowers>
+          int... Dimensions>
 bool
-operator==(const SIValue<ValueType1, Ratio1, BaseUnitPowers...>& v1,
-           const SIValue<ValueType2, Ratio2, BaseUnitPowers...>& v2)
+operator==(const SIValue<ValueType1, Ratio1, Dimensions...>& v1,
+           const SIValue<ValueType2, Ratio2, Dimensions...>& v2)
 {
 	const auto n1 = v1.value * Ratio1::num * Ratio2::den;
 	const auto n2 = v2.value * Ratio2::num * Ratio1::den;
@@ -242,20 +242,20 @@ operator==(const SIValue<ValueType1, Ratio1, BaseUnitPowers...>& v1,
  */
 template <typename ValueType1, typename Ratio1,
           typename ValueType2, typename Ratio2,
-          int... BaseUnitPowers>
+          int... Dimensions>
 bool
-operator!=(const SIValue<ValueType1, Ratio1, BaseUnitPowers...>& v1,
-           const SIValue<ValueType2, Ratio2, BaseUnitPowers...>& v2)
+operator!=(const SIValue<ValueType1, Ratio1, Dimensions...>& v1,
+           const SIValue<ValueType2, Ratio2, Dimensions...>& v2)
 {
 	return !(v1 == v2);
 }
 
 
 // This specialization compares values with same ratios, so no conversion is needed.
-template <typename ValueType1, typename ValueType2, typename Ratio, int... BaseUnitPowers>
+template <typename ValueType1, typename ValueType2, typename Ratio, int... Dimensions>
 bool
-operator<(const SIValue<ValueType1, Ratio, BaseUnitPowers...>& v1,
-          const SIValue<ValueType2, Ratio, BaseUnitPowers...>& v2)
+operator<(const SIValue<ValueType1, Ratio, Dimensions...>& v1,
+          const SIValue<ValueType2, Ratio, Dimensions...>& v2)
 {
 	return v1.value < v2.value;
 }
@@ -271,10 +271,10 @@ operator<(const SIValue<ValueType1, Ratio, BaseUnitPowers...>& v1,
  */
 template <typename ValueType1, typename Ratio1,
           typename ValueType2, typename Ratio2,
-          int... BaseUnitPowers>
+          int... Dimensions>
 bool
-operator<(const SIValue<ValueType1, Ratio1, BaseUnitPowers...>& v1,
-          const SIValue<ValueType2, Ratio2, BaseUnitPowers...>& v2)
+operator<(const SIValue<ValueType1, Ratio1, Dimensions...>& v1,
+          const SIValue<ValueType2, Ratio2, Dimensions...>& v2)
 {
 	const auto n1 = v1.value * Ratio1::num * Ratio2::den;
 	const auto n2 = v2.value * Ratio2::num * Ratio1::den;
@@ -292,10 +292,10 @@ operator<(const SIValue<ValueType1, Ratio1, BaseUnitPowers...>& v1,
  */
 template <typename ValueType1, typename Ratio1,
           typename ValueType2, typename Ratio2,
-          int... BaseUnitPowers>
+          int... Dimensions>
 bool
-operator>(const SIValue<ValueType1, Ratio1, BaseUnitPowers...>& v1,
-          const SIValue<ValueType2, Ratio2, BaseUnitPowers...>& v2)
+operator>(const SIValue<ValueType1, Ratio1, Dimensions...>& v1,
+          const SIValue<ValueType2, Ratio2, Dimensions...>& v2)
 {
 	return v2 < v1;
 }
@@ -311,10 +311,10 @@ operator>(const SIValue<ValueType1, Ratio1, BaseUnitPowers...>& v1,
  */
 template <typename ValueType1, typename Ratio1,
           typename ValueType2, typename Ratio2,
-          int... BaseUnitPowers>
+          int... Dimensions>
 bool
-operator<=(const SIValue<ValueType1, Ratio1, BaseUnitPowers...>& v1,
-           const SIValue<ValueType2, Ratio2, BaseUnitPowers...>& v2)
+operator<=(const SIValue<ValueType1, Ratio1, Dimensions...>& v1,
+           const SIValue<ValueType2, Ratio2, Dimensions...>& v2)
 {
 	return !(v1 > v2);
 }
@@ -329,10 +329,10 @@ operator<=(const SIValue<ValueType1, Ratio1, BaseUnitPowers...>& v1,
  */
 template <typename ValueType1, typename Ratio1,
           typename ValueType2, typename Ratio2,
-          int... BaseUnitPowers>
+          int... Dimensions>
 bool
-operator>=(const SIValue<ValueType1, Ratio1, BaseUnitPowers...>& v1,
-           const SIValue<ValueType2, Ratio2, BaseUnitPowers...>& v2)
+operator>=(const SIValue<ValueType1, Ratio1, Dimensions...>& v1,
+           const SIValue<ValueType2, Ratio2, Dimensions...>& v2)
 {
 	return !(v1 < v2);
 }
@@ -347,11 +347,11 @@ operator>=(const SIValue<ValueType1, Ratio1, BaseUnitPowers...>& v1,
  *         a value of the underlying type of the left operator to an int value.
  * @relates SIValue
  */
-template <typename ValueType, typename Ratio, int... BaseUnitPowers>
-SIValue<typename multiplication<ValueType, int>::type, Ratio, BaseUnitPowers...>
-operator*(const SIValue<ValueType, Ratio, BaseUnitPowers...>& v, int i) {
+template <typename ValueType, typename Ratio, int... Dimensions>
+SIValue<typename multiplication<ValueType, int>::type, Ratio, Dimensions...>
+operator*(const SIValue<ValueType, Ratio, Dimensions...>& v, int i) {
 	typedef
-		SIValue<typename multiplication<ValueType, int>::type, Ratio, BaseUnitPowers...>
+		SIValue<typename multiplication<ValueType, int>::type, Ratio, Dimensions...>
 		ResultType;
 	return ResultType(v.value * i);
 }
@@ -365,11 +365,11 @@ operator*(const SIValue<ValueType, Ratio, BaseUnitPowers...>& v, int i) {
  *         an int value to a value of the underlying type of the right operator.
  * @relates SIValue
  */
-template <typename ValueType, typename Ratio, int... BaseUnitPowers>
-SIValue<typename multiplication<int, ValueType>::type, Ratio, BaseUnitPowers...>
-operator*(int i, const SIValue<ValueType, Ratio, BaseUnitPowers...>& v) {
+template <typename ValueType, typename Ratio, int... Dimensions>
+SIValue<typename multiplication<int, ValueType>::type, Ratio, Dimensions...>
+operator*(int i, const SIValue<ValueType, Ratio, Dimensions...>& v) {
 	typedef
-		SIValue<typename multiplication<int, ValueType>::type, Ratio, BaseUnitPowers...>
+		SIValue<typename multiplication<int, ValueType>::type, Ratio, Dimensions...>
 		ResultType;
 	return ResultType(i * v.value);
 }
@@ -383,11 +383,11 @@ operator*(int i, const SIValue<ValueType, Ratio, BaseUnitPowers...>& v) {
  *         a value of the underlying type of the left operator to a double value.
  * @relates SIValue
  */
-template <typename ValueType, typename Ratio, int... BaseUnitPowers>
-SIValue<typename multiplication<ValueType, double>::type, Ratio, BaseUnitPowers...>
-operator*(const SIValue<ValueType, Ratio, BaseUnitPowers...>& v, double d) {
+template <typename ValueType, typename Ratio, int... Dimensions>
+SIValue<typename multiplication<ValueType, double>::type, Ratio, Dimensions...>
+operator*(const SIValue<ValueType, Ratio, Dimensions...>& v, double d) {
 	typedef
-		SIValue<typename multiplication<ValueType, double>::type, Ratio, BaseUnitPowers...>
+		SIValue<typename multiplication<ValueType, double>::type, Ratio, Dimensions...>
 		ResultType;
 	return ResultType(v.value * d);
 }
@@ -401,11 +401,11 @@ operator*(const SIValue<ValueType, Ratio, BaseUnitPowers...>& v, double d) {
  *         a double value to a value of the underlying type of the right operator.
  * @relates SIValue
  */
-template <typename ValueType, typename Ratio, int... BaseUnitPowers>
-SIValue<typename multiplication<double, ValueType>::type, Ratio, BaseUnitPowers...>
-operator*(double d, const SIValue<ValueType, Ratio, BaseUnitPowers...>& v) {
+template <typename ValueType, typename Ratio, int... Dimensions>
+SIValue<typename multiplication<double, ValueType>::type, Ratio, Dimensions...>
+operator*(double d, const SIValue<ValueType, Ratio, Dimensions...>& v) {
 	typedef
-		SIValue<typename multiplication<double, ValueType>::type, Ratio, BaseUnitPowers...>
+		SIValue<typename multiplication<double, ValueType>::type, Ratio, Dimensions...>
 		ResultType;
 	return ResultType(d * v.value);
 }
@@ -421,16 +421,16 @@ operator*(double d, const SIValue<ValueType, Ratio, BaseUnitPowers...>& v) {
  *         underlying type and ratio, given its unit is compatible.
  * @relates SIValue
  */
-template <typename ValueType1, typename Ratio1, int... BaseUnitPowers1,
-          typename ValueType2, typename Ratio2, int... BaseUnitPowers2>
-typename multiplication<SIValue<ValueType1, Ratio1, BaseUnitPowers1...>,
-                        SIValue<ValueType2, Ratio2, BaseUnitPowers2...>>::type
-operator*(const SIValue<ValueType1, Ratio1, BaseUnitPowers1...>& v1,
-          const SIValue<ValueType2, Ratio2, BaseUnitPowers2...>& v2)
+template <typename ValueType1, typename Ratio1, int... Dimensions1,
+          typename ValueType2, typename Ratio2, int... Dimensions2>
+typename multiplication<SIValue<ValueType1, Ratio1, Dimensions1...>,
+                        SIValue<ValueType2, Ratio2, Dimensions2...>>::type
+operator*(const SIValue<ValueType1, Ratio1, Dimensions1...>& v1,
+          const SIValue<ValueType2, Ratio2, Dimensions2...>& v2)
 {
 	typedef
-		typename multiplication<SIValue<ValueType1, Ratio1, BaseUnitPowers1...>,
-		                        SIValue<ValueType2, Ratio2, BaseUnitPowers2...>>::type
+		typename multiplication<SIValue<ValueType1, Ratio1, Dimensions1...>,
+		                        SIValue<ValueType2, Ratio2, Dimensions2...>>::type
 		ResultType;
 
 	return ResultType(v1.value * v2.value);
@@ -446,11 +446,11 @@ operator*(const SIValue<ValueType1, Ratio1, BaseUnitPowers1...>& v1,
  *         a value of the underlying type of the left operator by an int value.
  * @relates SIValue
  */
-template <typename ValueType, typename Ratio, int... BaseUnitPowers>
-SIValue<typename division<ValueType, int>::type, Ratio, BaseUnitPowers...>
-operator/(const SIValue<ValueType, Ratio, BaseUnitPowers...>& v, int i) {
+template <typename ValueType, typename Ratio, int... Dimensions>
+SIValue<typename division<ValueType, int>::type, Ratio, Dimensions...>
+operator/(const SIValue<ValueType, Ratio, Dimensions...>& v, int i) {
 	typedef
-		SIValue<typename division<ValueType, int>::type, Ratio, BaseUnitPowers...>
+		SIValue<typename division<ValueType, int>::type, Ratio, Dimensions...>
 		ResultType;
 	return ResultType(v.value / i);
 }
@@ -464,11 +464,11 @@ operator/(const SIValue<ValueType, Ratio, BaseUnitPowers...>& v, int i) {
  *         underlying type of the right operator.
  * @relates SIValue
  */
-template <typename ValueType, typename Ratio, int... BaseUnitPowers>
-SIValue<typename division<int, ValueType>::type, Ratio, BaseUnitPowers...>
-operator/(int i, const SIValue<ValueType, Ratio, BaseUnitPowers...>& v) {
+template <typename ValueType, typename Ratio, int... Dimensions>
+SIValue<typename division<int, ValueType>::type, Ratio, Dimensions...>
+operator/(int i, const SIValue<ValueType, Ratio, Dimensions...>& v) {
 	typedef
-		SIValue<typename division<int, ValueType>::type, Ratio, BaseUnitPowers...>
+		SIValue<typename division<int, ValueType>::type, Ratio, Dimensions...>
 		ResultType;
 	return ResultType(i / v.value);
 }
@@ -482,11 +482,11 @@ operator/(int i, const SIValue<ValueType, Ratio, BaseUnitPowers...>& v) {
  *         a value of the underlying type of the left operator by a double value.
  * @relates SIValue
  */
-template <typename ValueType, typename Ratio, int... BaseUnitPowers>
-SIValue<typename division<ValueType, double>::type, Ratio, BaseUnitPowers...>
-operator/(const SIValue<ValueType, Ratio, BaseUnitPowers...>& v, double d) {
+template <typename ValueType, typename Ratio, int... Dimensions>
+SIValue<typename division<ValueType, double>::type, Ratio, Dimensions...>
+operator/(const SIValue<ValueType, Ratio, Dimensions...>& v, double d) {
 	typedef
-		SIValue<typename division<ValueType, double>::type, Ratio, BaseUnitPowers...>
+		SIValue<typename division<ValueType, double>::type, Ratio, Dimensions...>
 		ResultType;
 	return ResultType(v.value / d);
 }
@@ -500,11 +500,11 @@ operator/(const SIValue<ValueType, Ratio, BaseUnitPowers...>& v, double d) {
  *         underlying type of the right operator.
  * @relates SIValue
  */
-template <typename ValueType, typename Ratio, int... BaseUnitPowers>
-SIValue<typename division<double, ValueType>::type, Ratio, BaseUnitPowers...>
-operator/(double d, const SIValue<ValueType, Ratio, BaseUnitPowers...>& v) {
+template <typename ValueType, typename Ratio, int... Dimensions>
+SIValue<typename division<double, ValueType>::type, Ratio, Dimensions...>
+operator/(double d, const SIValue<ValueType, Ratio, Dimensions...>& v) {
 	typedef
-		SIValue<typename division<double, ValueType>::type, Ratio, BaseUnitPowers...>
+		SIValue<typename division<double, ValueType>::type, Ratio, Dimensions...>
 		ResultType;
 	return ResultType(d / v.value);
 }
@@ -522,10 +522,10 @@ operator/(double d, const SIValue<ValueType, Ratio, BaseUnitPowers...>& v) {
  */
 template <typename ValueType1, typename Ratio1,
           typename ValueType2, typename Ratio2,
-          int... BaseUnitPowers>
+          int... Dimensions>
 typename division<ValueType1, ValueType2>::type
-operator/(const SIValue<ValueType1, Ratio1, BaseUnitPowers...>& v1,
-          const SIValue<ValueType2, Ratio2, BaseUnitPowers...>& v2)
+operator/(const SIValue<ValueType1, Ratio1, Dimensions...>& v1,
+          const SIValue<ValueType2, Ratio2, Dimensions...>& v2)
 {
 	/*
 	result = (v1.value * Ratio1::num / Ratio1::den) / (v2.value * Ratio2::num / Ratio2::den)
@@ -547,16 +547,16 @@ operator/(const SIValue<ValueType1, Ratio1, BaseUnitPowers...>& v1,
  * @relates SIValue
  * @todo Cross-simplify ratios.
  */
-template <typename ValueType1, typename Ratio1, int... BaseUnitPowers1,
-          typename ValueType2, typename Ratio2, int... BaseUnitPowers2>
-typename division<SIValue<ValueType1, Ratio1, BaseUnitPowers1...>,
-                  SIValue<ValueType2, Ratio2, BaseUnitPowers2...>>::type
-operator/(const SIValue<ValueType1, Ratio1, BaseUnitPowers1...>& v1,
-          const SIValue<ValueType2, Ratio2, BaseUnitPowers2...>& v2)
+template <typename ValueType1, typename Ratio1, int... Dimensions1,
+          typename ValueType2, typename Ratio2, int... Dimensions2>
+typename division<SIValue<ValueType1, Ratio1, Dimensions1...>,
+                  SIValue<ValueType2, Ratio2, Dimensions2...>>::type
+operator/(const SIValue<ValueType1, Ratio1, Dimensions1...>& v1,
+          const SIValue<ValueType2, Ratio2, Dimensions2...>& v2)
 {
 	typedef
-		typename division<SIValue<ValueType1, Ratio1, BaseUnitPowers1...>,
-		                  SIValue<ValueType2, Ratio2, BaseUnitPowers2...>>::type
+		typename division<SIValue<ValueType1, Ratio1, Dimensions1...>,
+		                  SIValue<ValueType2, Ratio2, Dimensions2...>>::type
 		ResultType;
 
 	return ResultType(v1.value / v2.value);
@@ -564,12 +564,12 @@ operator/(const SIValue<ValueType1, Ratio1, BaseUnitPowers1...>& v1,
 
 
 
-template <typename ValueType, typename Ratio, int... BaseUnitPowers>
-SIValue<ValueType, Ratio, BaseUnitPowers...>
-operator+(const SIValue<ValueType, Ratio, BaseUnitPowers...>& v1,
-          const SIValue<ValueType, Ratio, BaseUnitPowers...>& v2)
+template <typename ValueType, typename Ratio, int... Dimensions>
+SIValue<ValueType, Ratio, Dimensions...>
+operator+(const SIValue<ValueType, Ratio, Dimensions...>& v1,
+          const SIValue<ValueType, Ratio, Dimensions...>& v2)
 {
-	return SIValue<ValueType, Ratio, BaseUnitPowers...>(v1.value + v2.value);
+	return SIValue<ValueType, Ratio, Dimensions...>(v1.value + v2.value);
 }
 
 
@@ -586,15 +586,15 @@ operator+(const SIValue<ValueType, Ratio, BaseUnitPowers...>& v1,
  */
 template <typename ValueType1, typename Ratio1,
           typename ValueType2, typename Ratio2,
-          int... BaseUnitPowers>
-typename addition<SIValue<ValueType1, Ratio1, BaseUnitPowers...>,
-                  SIValue<ValueType2, Ratio2, BaseUnitPowers...>>::type
-operator+(const SIValue<ValueType1, Ratio1, BaseUnitPowers...>& v1,
-          const SIValue<ValueType2, Ratio2, BaseUnitPowers...>& v2)
+          int... Dimensions>
+typename addition<SIValue<ValueType1, Ratio1, Dimensions...>,
+                  SIValue<ValueType2, Ratio2, Dimensions...>>::type
+operator+(const SIValue<ValueType1, Ratio1, Dimensions...>& v1,
+          const SIValue<ValueType2, Ratio2, Dimensions...>& v2)
 {
 	typedef
-		typename addition<SIValue<ValueType1, Ratio1, BaseUnitPowers...>,
-		                  SIValue<ValueType2, Ratio2, BaseUnitPowers...>>::type
+		typename addition<SIValue<ValueType1, Ratio1, Dimensions...>,
+		                  SIValue<ValueType2, Ratio2, Dimensions...>>::type
 		ResultType;
 
 	return ResultType(
@@ -618,11 +618,11 @@ operator+(const SIValue<ValueType1, Ratio1, BaseUnitPowers...>& v1,
  */
 template <typename ValueType1, typename Ratio1,
           typename ValueType2, typename Ratio2,
-          int... BaseUnitPowers>
-typename addition<SIValue<ValueType1, Ratio1, BaseUnitPowers...>,
-                  SIValue<ValueType2, Ratio2, BaseUnitPowers...>>::type
-operator-(const SIValue<ValueType1, Ratio1, BaseUnitPowers...>& v1,
-          const SIValue<ValueType2, Ratio2, BaseUnitPowers...>& v2)
+          int... Dimensions>
+typename addition<SIValue<ValueType1, Ratio1, Dimensions...>,
+                  SIValue<ValueType2, Ratio2, Dimensions...>>::type
+operator-(const SIValue<ValueType1, Ratio1, Dimensions...>& v1,
+          const SIValue<ValueType2, Ratio2, Dimensions...>& v2)
 {
 	return v1 + -v2;
 }

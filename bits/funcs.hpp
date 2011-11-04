@@ -15,11 +15,11 @@ namespace std {
 /**
  * @details The return type is the same as the argument.
  */
-template <typename ValueType, typename Ratio, int... BaseUnitPowers>
-::si::SIValue<ValueType, Ratio, BaseUnitPowers...>
-abs(const ::si::SIValue<ValueType, Ratio, BaseUnitPowers...>& v) {
+template <typename ValueType, typename Ratio, int... Dimensions>
+::si::SIValue<ValueType, Ratio, Dimensions...>
+abs(const ::si::SIValue<ValueType, Ratio, Dimensions...>& v) {
 	typedef
-		typename ::si::SIValue<ValueType, Ratio, BaseUnitPowers...>
+		typename ::si::SIValue<ValueType, Ratio, Dimensions...>
 		ResultType;
 
 	return ResultType(abs(v.value));
@@ -32,13 +32,13 @@ abs(const ::si::SIValue<ValueType, Ratio, BaseUnitPowers...>& v) {
  * even. The return type has base units with half the powers of the argument
  * base units.
  */
-template <typename ValueType, typename Ratio, int... BaseUnitPowers>
-typename ::si::sqrt_function< ::si::SIValue<ValueType, Ratio, BaseUnitPowers...>>::type
-sqrt(const ::si::SIValue<ValueType, Ratio, BaseUnitPowers...>& v) {
-	static_assert(::si::int_list_all_even< ::si::int_list<BaseUnitPowers...>>::value, "All base unit powers must be even");
+template <typename ValueType, typename Ratio, int... Dimensions>
+typename ::si::sqrt_function< ::si::SIValue<ValueType, Ratio, Dimensions...>>::type
+sqrt(const ::si::SIValue<ValueType, Ratio, Dimensions...>& v) {
+	static_assert(::si::int_list_all_even< ::si::int_list<Dimensions...>>::value, "All base unit powers must be even");
 
 	typedef
-		typename ::si::sqrt_function< ::si::SIValue<ValueType, Ratio, BaseUnitPowers...>>::type
+		typename ::si::sqrt_function< ::si::SIValue<ValueType, Ratio, Dimensions...>>::type
 		ResultType;
 	return ResultType(sqrt(v.value * Ratio::num / Ratio::den));
 }

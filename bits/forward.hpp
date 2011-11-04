@@ -5,10 +5,10 @@
 namespace si {
 
 
-template <typename ValueType, typename Ratio, int... BaseUnitPowers>
+template <typename ValueType, typename Ratio, int... Dimensions>
 class SIValue;
 
-template <typename ValueType, typename Ratio, typename UnitsList>
+template <typename ValueType, typename Ratio, typename DimensionsList>
 struct make_value;
 
 
