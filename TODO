@@ -1,0 +1,22 @@
+- Test with is_same<> from <type_traits> header file:
+	- cm::apply_ratio<100> == m
+	- km::apply_ratio<1:1000> == m
+	- cm::apply_ratio<100000> == km
+	- km::apply_ratio<1:100000> == cm
+	- cm²::apply_ratio<100*100> == m²
+	- m::apply_ratio<1609344:1000> == km::apply_ratio<1609344:1000000>
+	- multiplication<m², m> == m³
+	- multiplication<m, m²> == m³
+	- multiplication<m/s, s> == m
+	- multiplication<Pa, m²> == N
+	- multiplication<Ω, S> == 1
+	- division<m³, m> == m²
+	- division<m³, m²> == m
+	- division<m³, m³> == 1
+	- division<m², m> == m
+	- division<m/s, s> == m/s²
+	- division<N, kg> == m/s²
+	- division<1, Ω> == S
+	- division<1, S> == Ω
+	- sqrt_function<m²> == m
+ 

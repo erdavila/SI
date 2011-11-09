@@ -195,10 +195,11 @@ class UnitMultiple(object):
 
 class Unit(object):
 	
-	def __init__(self, is_base_unit, quantities, symbol):
+	def __init__(self, is_base_unit, quantities, symbol, definition_symbol):
 		self._is_base_unit = is_base_unit
 		self.quantities = quantities
 		self.symbol = symbol
+		self.definition_symbol = definition_symbol
 		
 		UNITS.append(self)
 		UNITS_BY_SYMBOL[symbol] = self
@@ -254,11 +255,16 @@ class Unit(object):
 	
 	
 	def header_doc(self):
+		if self.definition_symbol is None:
+			def_symbol = ''
+		else:
+			def_symbol = ' = ' + self.definition_symbol
+		
 		return '\n'.join([
 				'/**',
 				' * @name %s' % self.quantities_str().capitalize(),
 				' * %s unit: %s<br>' % ('Base' if self._is_base_unit else 'Derived', self.name()),
-				' * Symbol: %s' % self.symbol,
+				' * Symbol: %s%s' % (self.symbol, def_symbol),
 				' */'
 			])
 	
@@ -270,7 +276,7 @@ class Unit(object):
 class BaseUnit(Unit):
 	
 	def __init__(self, index, quantities, symbol, name, multiples=None):
-		super(BaseUnit, self).__init__(True, quantities, symbol)
+		super(BaseUnit, self).__init__(True, quantities, symbol, definition_symbol=None)
 		
 		self._name = name
 		self._name_plural = name + 's'
@@ -300,8 +306,12 @@ class BaseUnit(Unit):
 
 class DerivedUnit(Unit):
 	def __init__(self, quantities, definition, symbol=None, name=None, name_plural=None, multiples=None):
-		if symbol is None: symbol = definition.symbol()
-		super(DerivedUnit, self).__init__(False, quantities, symbol)
+		if symbol is None:
+			symbol = definition.symbol()
+			definition_symbol = None
+		else:
+			definition_symbol = definition.symbol()
+		super(DerivedUnit, self).__init__(False, quantities, symbol, definition_symbol)
 		
 		if name is None:
 			name        = definition.name()
@@ -411,11 +421,16 @@ class Division(BinaryOperation):
 		super(Division, self).__init__(operand1, operand2)
 	
 	def symbol(self):
+		if self._operand1 is 1:
+			symbol1 = '1'
+		else:
+			symbol1 = self.operand1().symbol()
+		
 		symbol2 = self.operand2().symbol()
 		if '·' in symbol2:
 			symbol2 = '(' + symbol2 + ')'
 		
-		return self.operand1().symbol() + '/' + symbol2
+		return symbol1 + '/' + symbol2
 	
 	def name(self):
 		return self.operand1().name() + ' per ' + self.operand2().name()
