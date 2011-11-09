@@ -543,7 +543,8 @@ INPUT                  = bits/si_value.hpp   \
                          bits/operations.hpp \
                          bits/defs.hpp       \
                          bits/units.hpp      \
-                         bits/funcs.hpp
+                         bits/funcs.hpp      \
+                         si.hpp
 
 # This tag can be used to specify the character encoding of the source files 
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is 
