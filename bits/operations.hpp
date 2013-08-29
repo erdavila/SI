@@ -3,6 +3,7 @@
 
 
 #include <ratio>
+#include <cmath>
 #include "forward.hpp"
 #include "int_list.hpp"
 
