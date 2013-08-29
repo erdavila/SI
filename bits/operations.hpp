@@ -20,7 +20,7 @@ struct addition {
 private:
 	// The implementation is on an internal struct because Doxygen was confused the other way.
 	struct _impl {
-		typedef decltype(*static_cast<T1*>(0) + *static_cast<T2*>(0)) type;
+		typedef decltype(*static_cast<T1*>(nullptr) + *static_cast<T2*>(nullptr)) type;
 	};
 
 public:
@@ -68,7 +68,7 @@ struct multiplication {
 private:
 	// The implementation is on an internal struct because Doxygen was confused the other way.
 	struct _impl {
-		typedef decltype(*static_cast<T1*>(0) * *static_cast<T2*>(0)) type;
+		typedef decltype(*static_cast<T1*>(nullptr) * *static_cast<T2*>(nullptr)) type;
 	};
 
 public:
@@ -110,7 +110,7 @@ public:
  */
 template <typename T1, typename T2>
 struct division {
-	typedef decltype(*static_cast<T1*>(0) / *static_cast<T2*>(0)) type;
+	typedef decltype(*static_cast<T1*>(nullptr) / *static_cast<T2*>(nullptr)) type;
 };
 
 
@@ -137,7 +137,7 @@ template <typename SIValue>
 struct sqrt_function {
 private:
 	typedef typename SIValue::ValueType _Ptr;
-	typedef decltype(sqrt(*static_cast<_Ptr*>(0))) _NewValueType;
+	typedef decltype(sqrt(*static_cast<_Ptr*>(nullptr))) _NewValueType;
 
 	typedef ::std::ratio<1> _NewRatio;
 
