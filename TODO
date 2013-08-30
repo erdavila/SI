@@ -19,4 +19,5 @@
 	- division<1, Ω> == S
 	- division<1, S> == Ω
 	- sqrt_function<m²> == m
- 
+- Add user-defined literals for each unit.
+
